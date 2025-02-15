@@ -1,4 +1,4 @@
-from Habit import Habit
+from app.Habit import Habit
 from datetime import datetime
 import pytest
 
