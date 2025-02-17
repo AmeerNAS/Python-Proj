@@ -1,49 +1,130 @@
-import sqlite3
-from datetime import date, time
+import json
+from datetime import datetime
 
-def get_db(name = "main.db"):
-    db = sqlite3.connect(name)
-    create_tables(db)
-    return db
+class Database:
 
-def create_tables(db):
-    cr = db.cursor()
-    cr.execute("""CREATE TABLE IF NOT EXISTS counter (
-            name TEXT PRIMARY KEY,
-            description TEXT)""")
+    #Class costructor
+    def __init__(self, filename="main.json"):
+        self.filename = filename
+        self.db_schema = {
+            "database": self.filename,
+            "tables": {
+                "habit": [],
+            }
+        }
+        self.db = self.loadDB()
+
+    def saveDB(self):
+        """Saves the current database state to a JSON file."""
+        with open(self.filename, "w") as f:
+            json.dump(self.db, f, indent=4)
+
+    def loadDB(self):
+        """Loads the database from the file, or initializes if missing."""
+        try:
+            with open(self.filename, "r") as f:
+                return json.load(f)
+        except FileNotFoundError:
+            self.db = self.db_schema
+            self.saveDB()
+            return self.db
+        
+    """ 
+    ! OLD CODE
+    def __init__(self, filename="main.json"):
+        self.filename = filename
+        self.db_schema = {
+            "database": self.filename,
+            "tables": {
+                "habit": [],
+            }
+        }
+        self.id_counter=0
+        self.db = self.load_db()
+
+
+    def saveDB(self):
+        with open(self.filename, "w") as f:
+            json.dump(self.db, f, indent=4)
+
+    def load_db(self):
+        try:
+            with open(self.filename, "r") as f:
+                return json.load(f)
+        except FileNotFoundError:
+            self.saveDB()
+            return self.db_schema
+    """
     
-    cr.execute("""CREATE TABLE IF NOT EXISTS log (
-            date TEXT,
-            time TEXT,
-            counterName TEXT,
-            FOREIGN KEY (counterName) REFERENCES counter(name) 
-            )""")
-    
-    db.commit()
+    def addHabit(self, id, name, desc, type, completions=[]):
+        """ Creates a new habit entry """
+        if self.getHabitByName(name):
+            print(f"Error: Habit '{name}' already exists!")
+            return False
 
-def add_counter(db, name, desc):
-    cr = db.cursor()
+        # !!CHANGE TO DICT FUNCTION TO CREATE OBJECT 
+        habit_id = self.getNextID()
+        new_habit = {
+            "id": id,
+            "name": name,
+            "description": desc,
+            "interval": type,
+            "completion_dates": completions
+        }
+        self.db["tables"]["habit"].append(new_habit)
+        self.saveDB()
+        return habit_id
 
-    cr.execute("INSERT INTO counter VALUES (?, ?)", (name, desc))
-    db.commit
+    #database crawllers
+    def getHabitByName(self, name):
+        return [habit for habit in self.db["tables"]["habit"] if habit["name"] == name]
+    def getHabitByID(self, id):
+        for habit in self.db["tables"]["habit"]:
+            if habit["id"] == id:
+                return habit
+        return False
+        #return [habit for habit in self.db["tables"]["habit"] if habit["id"] == id]
 
-def increment_counter(db, name, eventDate=None, eventTime=None):
-    cr = db.cursor()
-    if not eventDate:
-        eventDate = str(date.today)
+    def markComplete(self, iD, markDate=None):
+        """ Handles appending a new completion date to a speciiified habit using its id """
+        
+        if not markDate:
+            markDate = datetime.today().strftime('%Y-%m-%d')
+        """ 
+        if not eventTime:
+            eventTime = datetime.now().strftime('%H:%M:%S') 
+        
+        
+        self.getHabitByID(id)["completion dates"].append(eventDate)
+        """
+        for habit in self.db["tables"]["habit"]:
+            if habit["id"] == iD:
+                habit["completion dates"].append(markDate)
+                self.saveDB()
+                return True
+        return False
 
-    if not eventTime:
-        eventTime = time.isoformat
+    """ 
+    def update_counter_status(db, name, status):
+        for counter in db["tables"]["counter"]:
+            if counter["name"] == name:
+                counter["status"] = status
+                saveDB(db)
+                return True
+        return False 
+    """
 
-    cr.execute("INSERT INTO log VALUES (?, ?, ?)", (name, eventDate, eventTime))
-    db.commit
+def testCode(self):
 
-def get_counterByName(db, name):
-    cr = db.cursor()
-    cr.execute("SELECT * FROM tracker WHERE name=?", (name))
-    return cr.fetchall()
+    #habit creation
+    """ self.add_habit(8, "example_habit", "This is a test habit", "daily")
+    print(self.getHabitByName("example_habit"))
+    print("++++++++++++++++") """
 
+    #after marking
+    self.mark_complete(0)
+    print(self.getHabitByID(0))
+    print("++++++++++++++++")
 
-db= get_db()
-create_tables(db)
-
+#db = Database()
+# testCode(db)
