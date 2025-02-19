@@ -1,5 +1,6 @@
 import json
 from datetime import datetime
+from Habit import Habit
 
 class Database:
 
@@ -29,6 +30,14 @@ class Database:
             self.saveDB()
             return self.db
         
+    def getNextID(self):
+        """Calculates the highest habit ID and returns it"""
+        #GPT first instance error solution:
+        db_data = self.loadDB() 
+        if not db_data["tables"]["habit"]:
+            return 0
+        return max(habit["id"] for habit in db_data["tables"]["habit"]) + 1
+        
     """ 
     ! OLD CODE
     def __init__(self, filename="main.json"):
@@ -56,22 +65,23 @@ class Database:
             return self.db_schema
     """
     
-    def addHabit(self, id, name, desc, type, completions=[]):
+    def addHabit(self, name, desc, type, check_record=[], id=None):
         """ Creates a new habit entry """
         if self.getHabitByName(name):
             print(f"Error: Habit '{name}' already exists!")
             return False
 
-        # !!CHANGE TO DICT FUNCTION TO CREATE OBJECT 
-        habit_id = self.getNextID()
-        new_habit = {
-            "id": id,
-            "name": name,
-            "description": desc,
-            "interval": type,
-            "completion_dates": completions
-        }
-        self.db["tables"]["habit"].append(new_habit)
+        # Done -!!CHANGE FUNCTION TO CREATE NEW OBJECT 
+        if id: habit_id=id
+        else: habit_id = self.getNextID()
+        new_habit = Habit(
+            habit_id,
+            name,
+            desc,
+            type,
+            check_record= check_record
+        )
+        self.db["tables"]["habit"].append(new_habit.toJSON())
         self.saveDB()
         return habit_id
 
@@ -82,7 +92,6 @@ class Database:
         for habit in self.db["tables"]["habit"]:
             if habit["id"] == id:
                 return habit
-        return False
         #return [habit for habit in self.db["tables"]["habit"] if habit["id"] == id]
 
     def markComplete(self, iD, markDate=None):
@@ -94,12 +103,11 @@ class Database:
         if not eventTime:
             eventTime = datetime.now().strftime('%H:%M:%S') 
         
-        
         self.getHabitByID(id)["completion dates"].append(eventDate)
         """
         for habit in self.db["tables"]["habit"]:
             if habit["id"] == iD:
-                habit["completion dates"].append(markDate)
+                habit["check_record"].append(markDate)
                 self.saveDB()
                 return True
         return False
@@ -113,18 +121,43 @@ class Database:
                 return True
         return False 
     """
+    def updateHabit(self, changed_habit_data):
+        counter = 0
+        for habit in self.db["tables"]["habit"]:
+            
+            if habit["id"] == changed_habit_data["id"]:
+                self.db["tables"]["habit"][counter]["name"] = changed_habit_data["name"]
+                self.db["tables"]["habit"][counter]["desc"] = changed_habit_data["desc"]
+                self.db["tables"]["habit"][counter]["interval"] = changed_habit_data["interval"]
+                self.db["tables"]["habit"][counter]["check_record"] = changed_habit_data["check_record"]
 
-def testCode(self):
+                self.saveDB()
+                # print("habit updated")
+                return 0
+            counter+= 1
+        return print("habit not found")
+        
 
+def testCode():
+    db = Database()
     #habit creation
-    """ self.add_habit(8, "example_habit", "This is a test habit", "daily")
-    print(self.getHabitByName("example_habit"))
-    print("++++++++++++++++") """
+    
+    db.addHabit("example_habit", "This is a test habit", "daily")
+    print(db.getHabitByName("example_habit"))
+    print("++++++++++++++++") 
+    
 
     #after marking
-    self.mark_complete(0)
-    print(self.getHabitByID(0))
+    db.markComplete(0)
+    print(db.getHabitByID(0))
     print("++++++++++++++++")
 
-#db = Database()
-# testCode(db)
+    #for updating
+    db.addHabit("update_habit", "This habit is unupdated", "daily", id=2)
+    data_to_update = db.getHabitByID(3)
+    
+    
+    return 0
+
+
+testCode()
