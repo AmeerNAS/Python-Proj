@@ -28,29 +28,6 @@ class Habit:
             self.check_record.append(date)
         return True
 
-    #Prof. compute streak method
-    def getStreak(self):
-        #Sort the check record and creates temp clone
-        sorted_dates = sorted(self.check_record)
-
-        #No records handling:
-        if not sorted_dates:
-            self.longest_streak = 0
-            return
-
-        #variable initialization
-        temp_c = 1    
-
-        for i in range(1, len(sorted_dates)):
-            if sorted_dates[i] -sorted_dates[i-1]==timedelta(days=1):
-                temp_c += 1
-                self.longest_streak = max(self.longest_streak, temp_c)
-            else:
-                temp_c = 1
-
-        self.current_streak = temp_c
-        return self.current_streak
-
     """     
     def editHabit(self, variable, newVariable):
         database = Database()
