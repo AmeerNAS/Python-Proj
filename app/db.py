@@ -1,12 +1,14 @@
 import json
+import os
 from datetime import datetime
-from Habit import Habit
 
+#TODO: make db standalone and import it in habit rather than the other way around.
+#TODO: updateHabit has O(n) try to find better algo.
 class Database:
 
     #Class costructor
-    def __init__(self, filename="main.json"):
-        self.filename = filename
+    def __init__(self, filename=None):
+        self.filename = filename if filename else os.getcwd() + "\\app\\main.json"
         self.db_schema = {
             "database": self.filename,
             "tables": {
@@ -67,26 +69,27 @@ class Database:
     
     def addHabit(self, name, desc, type, check_record=[], id=None):
         """ Creates a new habit entry """
+        #ensures unique names, might revert it
         if self.getHabitByName(name):
             print(f"Error: Habit '{name}' already exists!")
             return False
 
-        # Done -!!CHANGE FUNCTION TO CREATE NEW OBJECT 
-        if id: habit_id=id
-        else: habit_id = self.getNextID()
-        new_habit = Habit(
-            habit_id,
-            name,
-            desc,
-            type,
-            check_record= check_record
-        )
-        self.db["tables"]["habit"].append(new_habit.toJSON())
+        habit_id = self.getNextID()
+        new_habit = {
+            "id": id,
+            "name": name,
+            "description": desc,
+            "interval": type,
+            "check_record": check_record
+        }
+        self.db["tables"]["habit"].append(new_habit)
         self.saveDB()
         return habit_id
+    
 
     #database crawllers
     def getHabitByName(self, name):
+        """ Returns list of habits with the specified name (handle as list even if there is only one entry) """
         return [habit for habit in self.db["tables"]["habit"] if habit["name"] == name]
     def getHabitByID(self, id):
         for habit in self.db["tables"]["habit"]:
@@ -137,6 +140,18 @@ class Database:
             counter+= 1
         return print("habit not found")
         
+    """ 
+    update_habit test code:
+    existing_habit = self.db["tables"]["habit"]
+        for i, h in enumerate(existing_habits):
+            if h["id"] == habit_data["id"]:
+                existing_habits[i] = habit_data 
+                self.saveDB()
+                return 1
+        
+        return 0
+    #same speed :/
+    """
 
 def testCode():
     db = Database()
@@ -154,9 +169,9 @@ def testCode():
 
     #for updating
     db.addHabit("update_habit", "This habit is unupdated", "daily", id=2)
-    data_to_update = db.getHabitByID(3)
-    
-    
+    data_to_update = db.getHabitByID(2)
+    data_to_update["desc"] = "this habit has been updated"
+    db.updateHabit(data_to_update)
     return 0
 
 

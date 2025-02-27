@@ -1,5 +1,7 @@
 from datetime import timedelta, datetime
 from Habit import Habit
+import pandas as pd
+import matplotlib.pyplot as plt
 
 class Analytics:
     def __init__(self):
@@ -59,7 +61,7 @@ habit = Habit(1, "Test", "test habit for analytics", "daily", ["2025-02-19",
                     "2025-02-23",
                     "2025-02-19"] )
     
-
+""" 
 # test:
 streak = Analytics.getStreak(habit)
 longest_streak = Analytics.getStreak(habit, "long")
@@ -67,4 +69,5 @@ st1, st2 = Analytics.getStreak(habit, "both")
 
 print(f"Current Streak: {streak}")
 print(f"Longest Streak: {longest_streak}") 
-print(st1, st2)
+print(st1, st2) 
+"""
