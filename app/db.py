@@ -53,7 +53,6 @@ class Database:
         self.id_counter=0
         self.db = self.load_db()
 
-
     def saveDB(self):
         with open(self.filename, "w") as f:
             json.dump(self.db, f, indent=4)
@@ -85,35 +84,36 @@ class Database:
         self.db["tables"]["habit"].append(new_habit)
         self.saveDB()
         return habit_id
-    
 
     #database crawllers
     def getHabitByName(self, name):
         """ Returns list of habits with the specified name (handle as list even if there is only one entry) """
         return [habit for habit in self.db["tables"]["habit"] if habit["name"] == name]
+    
     def getHabitByID(self, id):
         for habit in self.db["tables"]["habit"]:
             if habit["id"] == id:
                 return habit
         #return [habit for habit in self.db["tables"]["habit"] if habit["id"] == id]
 
-    def markComplete(self, iD, markDate=None):
-        """ Handles appending a new completion date to a speciiified habit using its id """
+    """ def markComplete(self, iD, markDate=None):
+        "" Handles appending a new completion date to a speciiified habit using its id ""
         
         if not markDate:
             markDate = datetime.today().strftime('%Y-%m-%d')
-        """ 
+        "" 
         if not eventTime:
             eventTime = datetime.now().strftime('%H:%M:%S') 
         
         self.getHabitByID(id)["completion dates"].append(eventDate)
-        """
+        ""
         for habit in self.db["tables"]["habit"]:
             if habit["id"] == iD:
                 habit["check_record"].append(markDate)
                 self.saveDB()
                 return True
-        return False
+        return False 
+    """
 
     """ 
     def update_counter_status(db, name, status):
@@ -125,23 +125,16 @@ class Database:
         return False 
     """
     def updateHabit(self, changed_habit_data):
-        counter = 0
-        for habit in self.db["tables"]["habit"]:
-            
-            if habit["id"] == changed_habit_data["id"]:
-                self.db["tables"]["habit"][counter]["name"] = changed_habit_data["name"]
-                self.db["tables"]["habit"][counter]["desc"] = changed_habit_data["desc"]
-                self.db["tables"]["habit"][counter]["interval"] = changed_habit_data["interval"]
-                self.db["tables"]["habit"][counter]["check_record"] = changed_habit_data["check_record"]
-
+        habits = self.db["tables"]["habit"]
+        for i, h in enumerate(habits):
+            if h["id"] == changed_habit_data["id"]:
+                habits[i] = changed_habit_data 
                 self.saveDB()
-                # print("habit updated")
-                return 0
-            counter+= 1
-        return print("habit not found")
+                return 1
+        return 0
         
     """ 
-    update_habit test code:
+    #update_habit test code 1:
     existing_habit = self.db["tables"]["habit"]
         for i, h in enumerate(existing_habits):
             if h["id"] == habit_data["id"]:
@@ -153,26 +146,8 @@ class Database:
     #same speed :/
     """
 
-def testCode():
-    db = Database()
-    #habit creation
-    
-    db.addHabit("example_habit", "This is a test habit", "daily")
-    print(db.getHabitByName("example_habit"))
-    print("++++++++++++++++") 
-    
-
-    #after marking
-    db.markComplete(0)
-    print(db.getHabitByID(0))
-    print("++++++++++++++++")
-
-    #for updating
-    db.addHabit("update_habit", "This habit is unupdated", "daily", id=2)
-    data_to_update = db.getHabitByID(2)
-    data_to_update["desc"] = "this habit has been updated"
-    db.updateHabit(data_to_update)
-    return 0
-
-
-testCode()
+    """ 
+    #update_habit test code 2:
+        self.db["tables"]["habit"][str(habit_data["id"])] = habit_data  # runs it as a dict instead
+        self.saveDB()
+    """
