@@ -22,26 +22,15 @@ class Habit:
 
     #Check-off function: takes current date and appends it to check_record list then computes streak.
     def checkOff(self, date=None):
-        """ Checks off the habit based on its interval type """
-        if not date:
-            date = datetime.today().strftime('%Y-%m-%d')
+        """ Marks the habit as completed for the given date."""
+        date = date if date else datetime.today().strftime('%Y-%m-%d')
 
-        if date not in self.check_record:  
-            self.check_record.append(date)
+        if date in self.check_record:
+            print(f"Warning: Habit already checked off on {date}.")
+            return False  # Avoid duplicates
+
+        self.check_record.append(date)
         return True
-
-    """     
-    def editHabit(self, variable, newVariable):
-        database = Database()
-        habit_data = database.getHabitByID(self.id)
-        if habit_data:
-            print("Edit failed, Hbit object was not found")
-        else:
-            for var in habit_data:
-                if var == variable:
-                    var = newVariable
-            database.saveDB() 
-    """
     
     def isbroken(self):
         """ Checks if the habit has been 'broken' by detecting when was the last check in comparison to the current date.
@@ -91,13 +80,3 @@ class Habit:
             return f"Habit ({self.id}, {self.name}, desc: {self.desc},\n {self.interval}," # streak= {self.getStreak()}, longest Streak= {self.longest_streak} )"
         return f"Habit id={self.id}, name={self.name}, interval={self.interval}," # streak= {self.getStreak()}, longest Streak= {self.longest_streak} )"
 
-
-
-# Test
-test = Habit(1, "update","test habit for updating","daily")
-#test.editHabit("name", "updated")
-
-habit = Habit(2, "test", "test habit", "monthly", ["2025-02-19", "2025-02-11", "2025-02-13", "2025-02-14", "2025-02-15", "2025-02-16", "2025-02-17", "2025-02-23"])
-print(test.id) 
-print(habit.toString()) 
-print(habit.isbroken())

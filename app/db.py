@@ -31,7 +31,7 @@ class Database:
             self.db = self.db_schema
             self.saveDB()
             return self.db
-        
+         
     def getNextID(self):
         """Calculates the highest habit ID and returns it"""
         #GPT first instance error solution:
@@ -39,7 +39,7 @@ class Database:
         if not db_data["tables"]["habit"]:
             return 0
         return max(habit["id"] for habit in db_data["tables"]["habit"]) + 1
-        
+    
     """ 
     ! OLD CODE
     def __init__(self, filename="main.json"):
@@ -96,25 +96,6 @@ class Database:
                 return habit
         #return [habit for habit in self.db["tables"]["habit"] if habit["id"] == id]
 
-    """ def markComplete(self, iD, markDate=None):
-        "" Handles appending a new completion date to a speciiified habit using its id ""
-        
-        if not markDate:
-            markDate = datetime.today().strftime('%Y-%m-%d')
-        "" 
-        if not eventTime:
-            eventTime = datetime.now().strftime('%H:%M:%S') 
-        
-        self.getHabitByID(id)["completion dates"].append(eventDate)
-        ""
-        for habit in self.db["tables"]["habit"]:
-            if habit["id"] == iD:
-                habit["check_record"].append(markDate)
-                self.saveDB()
-                return True
-        return False 
-    """
-
     """ 
     def update_counter_status(db, name, status):
         for counter in db["tables"]["counter"]:
@@ -124,30 +105,25 @@ class Database:
                 return True
         return False 
     """
-    def updateHabit(self, changed_habit_data):
-        habits = self.db["tables"]["habit"]
-        for i, h in enumerate(habits):
-            if h["id"] == changed_habit_data["id"]:
-                habits[i] = changed_habit_data 
-                self.saveDB()
-                return 1
-        return 0
-        
-    """ 
-    #update_habit test code 1:
-    existing_habit = self.db["tables"]["habit"]
-        for i, h in enumerate(existing_habits):
-            if h["id"] == habit_data["id"]:
-                existing_habits[i] = habit_data 
-                self.saveDB()
-                return 1
-        
-        return 0
-    #same speed :/
-    """
 
-    """ 
-    #update_habit test code 2:
-        self.db["tables"]["habit"][str(habit_data["id"])] = habit_data  # runs it as a dict instead
-        self.saveDB()
-    """
+    def updateHabit(self, habit_id, updated_data):
+        """Updates specific fields of a habit instead of replacing the whole object. Only fields provided in `updated_data` will be updated. """
+        for habit in self.db["tables"]["habit"]:
+            if habit["id"] == habit_id:
+                habit.update(updated_data)  # Only update given fields
+                self.saveDB()
+                return True
+        return False  # Habit not found
+        # TODO: finish up the empty functions
+
+    def deleteHabit(self, habit_id):
+        """Deletes a habit by its ID."""
+        habit_id = str(habit_id)
+        if habit_id in self.db["tables"]["habit"]:
+            del self.db["tables"]["habit"][habit_id]
+            self.saveDB()
+            return True
+        return False
+    
+    def get_seed_data(self):
+        pass

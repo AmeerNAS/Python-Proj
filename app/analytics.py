@@ -9,6 +9,9 @@ class Analytics:
 
     #Prof. compute streak method
     # TODO: longest streak only gets updated on the first current streak, must rechange the calculation system to account for a longes streak the happened to old save data independantly
+    # TODO: add pyplot of history of streak
+    # TODO: add pyplot of multiple streaks stats
+    # TODO: add filter options
     def getStreak(habit: Habit, streak=None):
         """ 
         Sorts the check record list and creates temp clone for streak calculation, returns by default current streak only \n
@@ -46,28 +49,3 @@ class Analytics:
                 ValueError(streak)
         return habit.current_streak
         
-    
-habit = Habit(1, "Test", "test habit for analytics", "daily", ["2025-02-19",
-                    "2025-02-11",
-                    "2025-02-13",
-                    "2025-02-14",
-                    "2025-02-15",
-                    "2025-02-16",
-                    "2025-02-17",
-                    "2025-02-19",
-                    "2025-02-20",
-                    "2025-02-22",
-                    "2025-02-22",
-                    "2025-02-23",
-                    "2025-02-19"] )
-    
-""" 
-# test:
-streak = Analytics.getStreak(habit)
-longest_streak = Analytics.getStreak(habit, "long")
-st1, st2 = Analytics.getStreak(habit, "both")
-
-print(f"Current Streak: {streak}")
-print(f"Longest Streak: {longest_streak}") 
-print(st1, st2) 
-"""
