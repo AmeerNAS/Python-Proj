@@ -1,4 +1,5 @@
-from analytics import Analytics
+from app.analytics import *
+from app.Habit import Habit
 
 class testAnalytics:
     def startup_method(self):
@@ -21,9 +22,9 @@ class testAnalytics:
     
 
         # test:
-        streak = Analytics.getStreak(habit)
-        longest_streak = Analytics.getStreak(habit, "long")
-        st1, st2 = Analytics.getStreak(habit, "both")
+        streak = getStreak(habit)
+        longest_streak = getStreak(habit, "long")
+        st1, st2 = getStreak(habit, "both")
 
         print(f"Current Streak: {streak}")
         print(f"Longest Streak: {longest_streak}") 

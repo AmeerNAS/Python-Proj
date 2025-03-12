@@ -32,24 +32,18 @@ class Habit:
         self.check_record.append(date)
         return True
     
-    def isbroken(self):
-        """ Checks if the habit has been 'broken' by detecting when was the last check in comparison to the current date.
-        :return: False | True
-        :rtype: Boolean
-        """
-        lastcheck = datetime.date(datetime.strptime(self.check_record[-1], '%Y-%m-%d'))
-        today = datetime.date(datetime.today())
-        if (self.interval) == "daily":
-            x = 1
-        elif (self.interval) == "weekly":
-            x = 7
-        else: 
-            x = 30
+    def isBroken(self):
+        """Checks if the habit is broken by detecting when the last check-in was."""
+        if not self.check_record:
+            return True  # No check-ins means the habit is broken
+        
+        last_check = datetime.strptime(self.check_record[-1], '%Y-%m-%d').date()
+        today = datetime.today().date()
 
-        print(today - lastcheck)
-        if today - lastcheck <= timedelta(days=x):
-            return False
-        return True
+        # Determine allowed gap based on habit interval
+        interval_days = {"daily": 1, "weekly": 7, "monthly": 30}.get(self.interval, 1)
+        
+        return (today - last_check) > timedelta(days=interval_days)
 
     @staticmethod
     def fromJSON(data):

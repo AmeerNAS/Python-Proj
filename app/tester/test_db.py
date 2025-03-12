@@ -1,4 +1,4 @@
-from db import Database
+from app.db import Database
 
 class testDB:
     def startup_method(self):

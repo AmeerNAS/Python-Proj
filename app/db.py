@@ -91,10 +91,8 @@ class Database:
         return [habit for habit in self.db["tables"]["habit"] if habit["name"] == name]
     
     def getHabitByID(self, id):
-        for habit in self.db["tables"]["habit"]:
-            if habit["id"] == id:
-                return habit
-        #return [habit for habit in self.db["tables"]["habit"] if habit["id"] == id]
+        """Returns a habit by its ID."""
+        return self.db["tables"]["habit"].get(str(id), None)
 
     """ 
     def update_counter_status(db, name, status):
