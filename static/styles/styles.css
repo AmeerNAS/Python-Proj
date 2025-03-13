@@ -1,0 +1,75 @@
+* {
+  font-family: Arial, Helvetica, sans-serif
+}
+
+.layout {
+    width: 100%;
+  
+    display: grid;
+    grid:
+      "sidebar body" 1fr
+      / 0.20fr 1fr;
+    gap: 8px;
+  }
+  
+  .sidebar { 
+    display: grid;
+    grid:
+      "Habits" auto
+      "button" 25px
+      "analytics" auto
+      / 1fr;
+    gap: 8px;
+  }
+    .Habits { grid-area: Habits; }
+    .button { 
+      grid-area: button;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    
+    .analytics { grid-area: analytics;}
+
+  .body { grid-area: body; }
+    #nav-bar{
+    align-self: center;
+    }
+      #nav-bar ul {
+        /*
+        display:flex;
+        justify-content: center;
+        */
+        list-style-type: none;
+        
+        margin: 0;
+        padding: 0;
+        overflow: hidden;
+        position: -webkit-sticky; /* For Safari bcz prof */
+        position: sticky;
+        top: 0;
+      }
+      
+        #nav-bar li {
+          float: inline-start;
+          background-color: #333;
+        }
+        
+          #nav-bar li a {
+            display: block;
+            color: white;
+            text-align: center;
+            padding: 14px 16px;
+            text-decoration: none;
+          }
+          #nav-bar li a:hover {
+            background-color: #111;
+          }
+        
+        #active {
+          background-color: #4CAF50;
+        }
+    #longS{
+      height: 550;
+      width: 1200;
+    }

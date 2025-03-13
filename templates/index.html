@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Habitt</title>
+    <link href="{{ url_for('static', filename='styles/styles.css')}}", rel="stylesheet" />
+    
+</head>
+<body>
+    <h1> Habitt App</h1>
+    <section class="layout">
+        <div class="sidebar">
+            <div class="Habits">
+                <table class="card">Daily Habits:
+                    {{ list_daily_habits}}
+                </table>
+                <table class="card">Weekly Habits:
+
+                </table>
+            </div>
+                
+            <div class="button">
+                <button type="button">New +</button>
+            </div>
+                
+            <div class="analytics">
+                <table> Mini Analytics</table>
+            </div>
+            
+        </div>
+        <div class="body">
+            <nav id="nav-bar">
+                <ul>
+                    <li><a id="active" href="/">Analytics</a></li>
+                    <li><a href="/habits">Habits</a></li>
+                    <li><a href="/create">Create Page</a></li>
+                </ul>
+            </nav>
+            <div class="analytics" id="month">
+                
+            </div>
+            <div class="analytics" id="week">
+                
+            </div>
+            <div class="analytics" id="long">
+                <div>{{ plot_long | safe }}</div>
+            </div>
+
+            </div>
+        </div>
+      </section>
+      
+</body>
+</html>

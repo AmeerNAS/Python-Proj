@@ -1,11 +1,10 @@
 from datetime import datetime, timedelta
-from db import Database
-from analytics import Analytics
+from app.db import Database
 
+class Habit:
+    """ Habits class """   
 
-class Habit:   
-
-    def __init__(self, id, name, desc, interval, check_record=[]):
+    def __init__(self, id: int, name: str, desc: str, interval: str, check_record=None):
         
         # Basic data initialization
         #could potentially be replaced with more efficient solution
@@ -18,7 +17,7 @@ class Habit:
         self.current_streak = 0
 
         # check-off dates record list
-        self.check_record = check_record
+        self.check_record = check_record if check_record else []
 
     #Check-off function: takes current date and appends it to check_record list then computes streak.
     def checkOff(self, date=None):
@@ -46,15 +45,15 @@ class Habit:
         return (today - last_check) > timedelta(days=interval_days)
 
     @staticmethod
-    def fromJSON(data):
+    def fromJSON(data: dict[str, any]):
         """ Creates a Habit object from JSON data """
         return Habit(
-            id = data["id"],
+            id = int(data["id"]),
             name = data["name"],
             desc = data["desc"],
             interval = data["interval"],
             #check_record=database["check_record"]
-            check_record=data.get["check_record", []]
+            check_record=data.get("check_record", [])
         )
 
     def toJSON(self):
