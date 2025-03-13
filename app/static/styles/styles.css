@@ -15,8 +15,8 @@
   .sidebar { 
     display: grid;
     grid:
-      "Habits" auto
       "button" 25px
+      "Habits" auto
       "analytics" auto
       / 1fr;
     gap: 8px;

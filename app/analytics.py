@@ -55,27 +55,6 @@ def getStreak(habit: Habit, streak=None):
         raise ValueError(f"Invalid streak option: {streak}")
 
     return habit.current_streak
-    
-""" def computeStreak(habit):
-    ""Calculate current and longest streaks without modifying habit.""
-    records = parse_dates(habit)
-    if not records:
-        return 0, 0  # No streaks if no records
-
-    sorted_dates = sorted(records)
-    current_streak = 1
-    longest_streak = 1
-    temp_streak = 1
-
-    for i in range(1, len(sorted_dates)):
-        if sorted_dates[i] - sorted_dates[i-1] == timedelta(days=1):
-            temp_streak += 1
-            longest_streak = max(longest_streak, temp_streak)
-        else:
-            temp_streak = 1
-
-    current_streak = temp_streak
-    return current_streak, longest_streak """
 
 def filterHabits(habits: list[Habit], interval=None, min_streak=None):
     """Filter habits by interval or minimum streak length."""
@@ -115,7 +94,7 @@ def plotLongestStreaks(habits: list[Habit]):
         width=0.6
     ))
 
-    # Customize layout
+    #for layout
     fig.update_layout(
         title="Longest Streak of Habits",
         xaxis_title="Habits",
@@ -123,15 +102,68 @@ def plotLongestStreaks(habits: list[Habit]):
         xaxis=dict(),
         yaxis=dict(
             tickmode="linear",
-            dtick=1,  # Force ticks to be whole numbers
-            tickformat="d"  # Format as integers
+            dtick=1,  
+            tickformat="d"  #integer
         ),
         template="plotly_white",
         height=500,  #adjusts html element hight
-        width=1200 
+        #width=1200 
     )
 
     # Convert Plotly figure to HTML
     fig_in_html = pio.to_html(fig, full_html=False)
     
     return fig_in_html
+
+# +++++++++++++++++++
+# Progress Calculator
+# +++++++++++++++++++
+def getProgress(habits: list[Habit], date):
+    """Calculate the percentage of habits completed on a given date."""
+    total_habits = len(habits)
+    completed_habits = sum(1 for habit in habits if date in habit.check_record)
+    
+    return (completed_habits / total_habits) * 100 if total_habits > 0 else 0
+
+def getWeeklyProgress(habits):
+    """Generate progress history for the past 7 days."""
+    today = datetime.today()
+    progress_history = {}
+
+    for i in range(7):
+        day = (today - timedelta(days=i)).strftime('%Y-%m-%d')
+        progress_history[day] = getProgress(habits, day)
+
+    return dict(sorted(progress_history.items()))  # Sort by date
+
+def plotWeeklyProgress(habits: list[Habit]):
+    """Generate a Plotly area plot for weekly progress."""
+    weekly_progress = getWeeklyProgress(habits)
+
+    #gets pairwise values
+    dates = list(weekly_progress.keys())
+    progress_values = list(weekly_progress.values())
+
+    #area plot
+    fig = go.Figure()
+    fig.add_trace(go.Scatter(
+        x=dates, y=progress_values, mode='lines+text',
+        fill='tozeroy',
+        line=dict(color='black', width=2),  
+        fillcolor='rgba(135, 206, 250, 0.5)',  
+        text=[f"{val:.0f}%" for val in progress_values],  
+        textposition="top center",  
+        name="Weekly Progress"
+    ))
+
+    fig.update_layout(
+        title="Weekly Habit Completion Progress",
+        xaxis_title="Date",
+        yaxis_title="Progress (%)",
+        yaxis=dict(range=[0, 120], tickmode='linear', dtick=20),  # Adjusted range for visual effect
+        xaxis=dict(showgrid=False),
+        plot_bgcolor="rgba(0,0,0,0)",
+        showlegend=False
+    )
+
+    return fig.to_html()

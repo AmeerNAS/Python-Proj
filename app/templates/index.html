@@ -11,19 +11,17 @@
     <h1> Habitt App</h1>
     <section class="layout">
         <div class="sidebar">
-            <div class="Habits">
-                <table class="card">Daily Habits:
-                    {{ list_daily_habits}}
-                </table>
-                <table class="card">Weekly Habits:
-
-                </table>
-            </div>
-                
             <div class="button">
                 <button type="button">New +</button>
             </div>
-                
+            <div class="Habits"> Habits:
+                <table class="card" id="daily_habits">:
+                    {% include "partials/list_cards.html" %}
+                </table>
+                <table class="card" id="weekly_habits">
+                    {% include "partials/list_cards.html" %}
+                </table>
+            </div>
             <div class="analytics">
                 <table> Mini Analytics</table>
             </div>
@@ -37,10 +35,10 @@
                     <li><a href="/create">Create Page</a></li>
                 </ul>
             </nav>
-            <div class="analytics" id="month">
-                
-            </div>
             <div class="analytics" id="week">
+                <div>{{ plot_weekly_prog | safe }}</div>
+            </div>
+            <div class="analytics" id="month">
                 
             </div>
             <div class="analytics" id="long">
