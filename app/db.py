@@ -40,38 +40,12 @@ class Database:
             return 0
         return max(habit["id"] for habit in db_data["tables"]["habit"]) + 1
     
-    """ 
-    ! OLD CODE
-    def __init__(self, filename="main.json"):
-        self.filename = filename
-        self.db_schema = {
-            "database": self.filename,
-            "tables": {
-                "habit": [],
-            }
-        }
-        self.id_counter=0
-        self.db = self.load_db()
-
-    def saveDB(self):
-        with open(self.filename, "w") as f:
-            json.dump(self.db, f, indent=4)
-
-    def load_db(self):
-        try:
-            with open(self.filename, "r") as f:
-                return json.load(f)
-        except FileNotFoundError:
-            self.saveDB()
-            return self.db_schema
-    """
-    
     def addHabit(self, name, desc, type, check_record=[], id=None):
         """ Creates a new habit entry """
         #ensures unique names, might revert it
         if self.getHabitByName(name):
             print(f"Error: Habit '{name}' already exists!")
-            return False
+            raise ValueError
 
         habit_id = self.getNextID()
         new_habit = {
@@ -93,16 +67,6 @@ class Database:
     def getHabitByID(self, id):
         """Returns a habit by its ID."""
         return self.db["tables"]["habit"].get(str(id), None)
-
-    """ 
-    def update_counter_status(db, name, status):
-        for counter in db["tables"]["counter"]:
-            if counter["name"] == name:
-                counter["status"] = status
-                saveDB(db)
-                return True
-        return False 
-    """
 
     def updateHabit(self, habit_id, updated_data):
         """Updates specific fields of a habit instead of replacing the whole object. Only fields provided in `updated_data` will be updated. """

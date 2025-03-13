@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Habit</title>
+</head>
+<body>
+    <h1>Todo List</h1>  
+    <div>Add a new todo item:  
+        <form action="{{ url_for('add') }}" method="POST">  
+            <input type="text" name="name">
+            <input type="text" name="desc">  
+            <select id="interval" name="inerval">
+                <option value="daily">Daily</option>
+                <option value="weekly">Weekly</option>
+            </select>
+            <input type="submit" value="Add Item" class="button">  
+        </form>  
+    </div>  
+</body>
+</html>

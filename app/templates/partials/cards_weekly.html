@@ -1,0 +1,6 @@
+<form class="card" method="POST"> 
+    {% for h in habits_weekly %}
+        <input type="checkbox" class="h_check" name="{{ h.name }}" value=" {{ h.id }}">
+        <label for="{{ h.name }}"><a href="/habit/{{ h.id }}"> {{h.name}} </a></label><br>
+    {% endfor %}
+</form>
