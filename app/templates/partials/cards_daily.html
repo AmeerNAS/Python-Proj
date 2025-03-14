@@ -1,6 +1,28 @@
-<form class="card" method="POST"> 
-    {% for h in habits_daily %}
-        <input type="checkbox" class="h_check" name="{{ h.name }}" value=" {{ h.id }}" onchange="{{ url_for('check', habit_id=h.id) }}">
-        <label for="{{ h.name }}"><a href="habit/{{ h.id }}"> {{h.name}} </a></label><br>
-    {% endfor %}
-</form>
+<p>There are {{ habits_daily|length }} daily habits.</p>
+<div id="daily_habits"><span>Daily:</span>
+    <form class="card">
+        {% for h in habits_daily %}
+            <input type="checkbox" class="h_check" id="habit_{{ h.id }}" 
+                   value="{{ h.id }}" 
+                   {% if h.isChecked() %}checked{% endif %}>
+            <label for="habit_{{ h.id }}">
+                <a href="/habit/{{ h.id }}"> {{ h.name }} </a>
+            </label>
+            <br>
+        {% endfor %}
+    </form>
+</div>
+
+<div id="weekly_habits"> <span>Weekly:</span>
+    <form class="card">
+        {% for h in habits_weekly %}
+            <input type="checkbox" class="h_check" id="habit_{{ h.id }}" 
+                   value="{{ h.id }}" 
+                   {% if h.isChecked() %}checked{% endif %}>
+            <label for="habit_{{ h.id }}">
+                <a href="/habit/{{ h.id }}"> {{ h.name }} </a>
+            </label>
+            <br>
+        {% endfor %}
+    </form>
+</div>

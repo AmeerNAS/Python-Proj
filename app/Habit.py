@@ -4,7 +4,7 @@ from app.db import Database
 class Habit:
     """ Habits class """   
 
-    def __init__(self, id: int, name: str, desc: str, interval: str, check_record=None):
+    def __init__(self, id: int, name: str, desc: str, interval: str, check_record=None, current_streak=0, longest_streak=0):
         
         # Basic data initialization
         #could potentially be replaced with more efficient solution
@@ -13,25 +13,37 @@ class Habit:
         self.name = name
         self.desc = desc
         self.interval = interval
-        self.longest_streak = 0
-        self.current_streak = 0
+        self.current_streak = current_streak
+        self.longest_streak = longest_streak
 
         # check-off dates record list
-        self.check_record = check_record if check_record else []
+        self.check_record = check_record if isinstance(check_record, list) else []
 
     #Check-off function: takes current date and appends it to check_record list then computes streak.
     def checkOff(self, date=None):
         """ Marks the habit as completed for the given date."""
         date = date if date else datetime.today().strftime('%Y-%m-%d')
 
+        # recurring execute check
         if date in self.check_record:
             print(f"Warning: Habit already checked off on {date}.")
             return False  # Avoid duplicates
 
         self.check_record.append(date)
+        db = Database()
+        db.updateHabit(self.toJSON())
         return True
     
-    def isBroken(self):
+    def uncheckOff(self, date=None):
+        """checkOff reverser"""
+        date = date if date else datetime.today().strftime('%Y-%m-%d')
+         
+        if date in self.check_record:
+            self.check_record.remove(date)
+            return True
+        return False
+    
+    def isChecked(self):
         """Checks if the habit is broken by detecting when the last check-in was."""
         if not self.check_record:
             return True  # No check-ins means the habit is broken

@@ -47,11 +47,11 @@ class Database:
             print(f"Error: Habit '{name}' already exists!")
             raise ValueError
 
-        habit_id = self.getNextID()
+        habit_id = id or self.getNextID()
         new_habit = {
-            "id": id,
+            "id": habit_id,
             "name": name,
-            "description": desc,
+            "desc": desc,
             "interval": type,
             "check_record": check_record
         }
@@ -64,28 +64,29 @@ class Database:
         """ Returns list of habits with the specified name (handle as list even if there is only one entry) """
         return [habit for habit in self.db["tables"]["habit"] if habit["name"] == name]
     
-    def getHabitByID(self, id):
+    def getHabitByID(self, habit_id: int):
         """Returns a habit by its ID."""
-        return self.db["tables"]["habit"].get(str(id), None)
-
-    def updateHabit(self, habit_id, updated_data):
-        """Updates specific fields of a habit instead of replacing the whole object. Only fields provided in `updated_data` will be updated. """
         for habit in self.db["tables"]["habit"]:
-            if habit["id"] == habit_id:
-                habit.update(updated_data)  # Only update given fields
-                self.saveDB()
+            if int(habit["id"]) == habit_id:
+                return habit
+        return None
+
+    def updateHabit(self, habit_json):
+        """Ensures habit is updated in-place and saves to the database."""
+        for index, habit in enumerate(self.db["tables"]["habit"]):
+            if habit["id"] == habit_json["id"]:
+                self.db["tables"]["habit"][index]= habit_json
+                print(f"Updated Habit {habit_json["id"]}: {self.db['tables']['habit'][index]}")
+                self.saveDB()  # ✅ Ensure it writes to `main.json`
                 return True
-        return False  # Habit not found
+        return False
         # TODO: finish up the empty functions
 
     def deleteHabit(self, habit_id):
         """Deletes a habit by its ID."""
-        habit_id = str(habit_id)
-        if habit_id in self.db["tables"]["habit"]:
-            del self.db["tables"]["habit"][habit_id]
-            self.saveDB()
-            return True
-        return False
+        habit_id = int(habit_id)
+        self.db["tables"]["habit"] = [habit for habit in self.db["tables"]["habit"] if int(habit["id"]) != habit_id]
+        self.saveDB()
     
     def get_seed_data(self):
         pass

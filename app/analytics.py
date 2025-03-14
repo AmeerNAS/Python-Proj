@@ -1,5 +1,5 @@
 from datetime import timedelta, datetime
-from app.Habit import Habit
+from app.habit import Habit
 import numpy as np
 import matplotlib.pyplot as plt
 import plotly.graph_objects as go
@@ -40,13 +40,16 @@ def getStreak(habit: Habit, streak=None):
     for i in range(1, len(sorted_dates)):
         if sorted_dates[i] - sorted_dates[i - 1] == timedelta(days=1):
             current_streak += 1
-            max_streak = max(max_streak, current_streak)  # Only update if we find a longer streak
+            max_streak = max(max_streak, current_streak)  #update if we find a longer streak
         else:
-            current_streak = 1  # Reset only current streak (longest remains)
+            current_streak = 1 
 
     habit.current_streak = current_streak
-    habit.longest_streak = max_streak  # Preserve longest streak
+    habit.longest_streak = max_streak
 
+    #Debug print
+    #print(f"📊 DEBUG: Habit {habit.id} -> Current Streak: {habit.current_streak}, Longest Streak: {habit.longest_streak}")
+    
     if streak == "long":
         return habit.longest_streak
     elif streak == "both":
@@ -56,15 +59,23 @@ def getStreak(habit: Habit, streak=None):
 
     return habit.current_streak
 
-def filterHabits(habits: list[Habit], interval=None, min_streak=None):
+def filterHabits(habits: list[Habit], name: str =None, interval=None, min_streak=None):
     """Filter habits by interval or minimum streak length."""
-    filtered = habits
+    filtered = habits.copy()
+    if name:
+        name_lower = name.lower()
+        filtered = [h for h in filtered if name_lower in h.name.lower()]
+
     if interval:
-        filtered = [h for h in filtered if h.interval == interval]
+        filtered = [h for h in filtered if h.interval.lower() == interval.lower()]
+
     if min_streak:
-        filtered = [h for h in filtered if getStreak(h, "long") >= min_streak]
+        filtered = [h for h in filtered if h.current_streak >= min_streak]
     return filtered
 
+# +++++++++++++++++++
+# Filters and Sorters
+# +++++++++++++++++++
 def sortHabits(habits: list[Habit], by="name", reverse=False):
     """Sort habits by name, interval, or streak length."""
     key_func = {
@@ -77,9 +88,13 @@ def sortHabits(habits: list[Habit], by="name", reverse=False):
 
 def plotLongestStreaks(habits: list[Habit]):
     """Generate an HTML representation of the streaks plot using Plotly."""
+    # Compute streaks once and sort habits accordingly
+    habit_n_streaks = [(h.name, getStreak(h, "long")) for h in habits]
+    habit_n_streaks.sort(key=lambda x: x[1], reverse=True)  # Sort by streak (descending)
+
+    # Unpack sorted habit names and streak values
+    habit_names, streaks = zip(*habit_n_streaks) if habit_n_streaks else ([], [])
     
-    habit_names = [h.name for h in habits]
-    streaks = [getStreak(h, "long") for h in habits]
 
     #create Plotly instance
     fig = go.Figure()
@@ -161,7 +176,9 @@ def plotWeeklyProgress(habits: list[Habit]):
         xaxis_title="Date",
         yaxis_title="Progress (%)",
         yaxis=dict(range=[0, 120], tickmode='linear', dtick=20),  # Adjusted range for visual effect
-        xaxis=dict(showgrid=False),
+        xaxis=dict(
+            #range=[dates[0] - timedelta(hours=12), dates[-1] + timedelta(hours=12)],
+            showgrid=False),
         plot_bgcolor="rgba(0,0,0,0)",
         showlegend=False
     )

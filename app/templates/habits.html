@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Habit Tracker</title>
+    <script defer src="/static/js/habits.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+
+        /* Navbar */
+        .navbar {
+            background-color: #007bff;
+            padding: 15px;
+            color: white;
+            text-align: center;
+            font-size: 18px;
+        }
+        .navbar a {
+            color: white;
+            text-decoration: none;
+            padding: 10px 15px;
+            display: inline-block;
+        }
+        .navbar a:hover {
+            background-color: #0056b3;
+        }
+
+        /* Container */
+        .container {
+            max-width: 1000px;
+            margin: 20px auto;
+            padding: 20px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            text-align: center;
+        }
+
+        /* Table */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        th {
+            background-color: #007bff;
+            color: white;
+        }
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        tr:hover {
+            background-color: #f1f1f1;
+            cursor: pointer;
+        }
+        .searchbar {
+            display: flex;
+            flex-direction: row;
+            max-width: 1000px;
+            margin: auto;
+        }
+        .searchbar input, select {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+        }
+    </style>
+    <!-- <script>
+        async function fetchHabits() {
+            try {
+                const response = await fetch("/api/habits");
+                const habits = await response.json();
+                console.log("Fetched habits:", habits); // Debugging
+                displayHabits(habits);
+            } catch (error) {
+                console.error("Error fetching habits:", error);
+            }
+        }
+
+        function displayHabits(habits) {
+            const tableBody = document.getElementById("habitTableBody");
+            tableBody.innerHTML = ""; // Clear previous content
+
+            habits.forEach(habit => {
+                const row = document.createElement("tr");
+                row.innerHTML = `
+                    <td>${habit.name}</td>
+                    <td>${habit.desc ? habit.desc : "No description"}</td>
+                    <td>${habit.interval}</td>
+                    <td>${habit.streak}</td>
+                `;
+                row.onclick = () => window.location.href = `/habit/${habit.id}`; // Redirect to habit details page
+                tableBody.appendChild(row);
+            });
+        }
+
+        window.onload = fetchHabits;
+    </script> -->
+</head>
+<body>
+    <div class="navbar">
+        <a href="/">Home</a>
+        <a href="/habits">All Habits</a>
+        <a href="/create">Create Habit</a>
+    </div>
+    <h1>All Habits</h1>
+    <div class="searchbar">
+
+
+        <input type="text" id="search" placeholder="Search habits..." />
+        <select id="interval">
+            <option value="all">All Intervals</option>
+            <option value="daily">Daily</option>
+            <option value="weekly">Weekly</option>
+        </select>
+        <input type="number" id="streak" placeholder="Minimum Streak Length" />
+        <button onclick="fetchHabits()">Filter</button>
+    </div>
+
+
+    <div class="container">
+        <h1>All Habits</h1>
+        <table>
+            <thead>
+                <tr>
+                    <th>Habit Name</th>
+                    <th>Desc</th>
+                    <th>Interval</th>
+                    <th>Streak</th>
+                </tr>
+            </thead>
+            <tbody id="habitTableBody">
+                <!-- Habit rows will be inserted here -->
+            </tbody>
+        </table>
+    </div>
+</body>
+</html>

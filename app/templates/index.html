@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="{{ url_for('static', filename='js/checkboxes.js') }}"></script>
     <title>Habitt</title>
     <link href="{{ url_for('static', filename='styles/styles.css')}}", rel="stylesheet" />
     
@@ -12,15 +13,10 @@
     <section class="layout">
         <div class="sidebar">
             <div class="button">
-                <button type="button">New +</button>
+                <button type="button" onclick="location.href='/creator';">New +</button>
             </div>
             <div class="Habits"> Habits:
-                <div id="daily_habits"><span>Daily:</span>
-                    {%include "partials/cards_daily.html"%}
-                </div>
-                <div id="weekly_habits"> <span>Weekly:</span>
-                    {%include "partials/cards_weekly.html"%}
-                </div>
+                {% include "partials/cards_daily.html"%}
             </div>
             <div class="analytics">
                 <table> Mini Analytics</table>
