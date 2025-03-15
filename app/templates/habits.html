@@ -78,37 +78,6 @@
             margin: 10px 0;
         }
     </style>
-    <!-- <script>
-        async function fetchHabits() {
-            try {
-                const response = await fetch("/api/habits");
-                const habits = await response.json();
-                console.log("Fetched habits:", habits); // Debugging
-                displayHabits(habits);
-            } catch (error) {
-                console.error("Error fetching habits:", error);
-            }
-        }
-
-        function displayHabits(habits) {
-            const tableBody = document.getElementById("habitTableBody");
-            tableBody.innerHTML = ""; // Clear previous content
-
-            habits.forEach(habit => {
-                const row = document.createElement("tr");
-                row.innerHTML = `
-                    <td>${habit.name}</td>
-                    <td>${habit.desc ? habit.desc : "No description"}</td>
-                    <td>${habit.interval}</td>
-                    <td>${habit.streak}</td>
-                `;
-                row.onclick = () => window.location.href = `/habit/${habit.id}`; // Redirect to habit details page
-                tableBody.appendChild(row);
-            });
-        }
-
-        window.onload = fetchHabits;
-    </script> -->
 </head>
 <body>
     <div class="navbar">
@@ -136,6 +105,7 @@
         <table>
             <thead>
                 <tr>
+                    <th>ID</th>
                     <th>Habit Name</th>
                     <th>Desc</th>
                     <th>Interval</th>

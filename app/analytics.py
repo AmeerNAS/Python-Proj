@@ -111,7 +111,7 @@ def plotLongestStreaks(habits: list[Habit]):
 
     #for layout
     fig.update_layout(
-        title="Longest Streak of Habits",
+        title="",
         xaxis_title="Habits",
         yaxis_title="Longest Streak",
         xaxis=dict(),
@@ -121,7 +121,10 @@ def plotLongestStreaks(habits: list[Habit]):
             tickformat="d"  #integer
         ),
         template="plotly_white",
-        height=500,  #adjusts html element hight
+        
+        #css control
+        margin=dict(l=40, r=40, t=10, b=40),
+        height=500
         #width=1200 
     )
 
@@ -172,7 +175,7 @@ def plotWeeklyProgress(habits: list[Habit]):
     ))
 
     fig.update_layout(
-        title="Weekly Habit Completion Progress",
+        title="",
         xaxis_title="Date",
         yaxis_title="Progress (%)",
         yaxis=dict(range=[0, 120], tickmode='linear', dtick=20),  # Adjusted range for visual effect
@@ -180,7 +183,10 @@ def plotWeeklyProgress(habits: list[Habit]):
             #range=[dates[0] - timedelta(hours=12), dates[-1] + timedelta(hours=12)],
             showgrid=False),
         plot_bgcolor="rgba(0,0,0,0)",
-        showlegend=False
+        showlegend=False,
+        
+        #margin control
+        margin=dict(l=40, r=40, t=10, b=40)  
     )
 
     return fig.to_html()

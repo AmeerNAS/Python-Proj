@@ -5,42 +5,40 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="{{ url_for('static', filename='js/checkboxes.js') }}"></script>
     <title>Habitt</title>
-    <link href="{{ url_for('static', filename='styles/styles.css')}}", rel="stylesheet" />
+    <link href="{{ url_for('static', filename='styles/index.css')}}", rel="stylesheet" />
     
 </head>
 <body>
-    <h1> Habitt App</h1>
+    <div class="header">
+        <img src="static\img\Ht icon.png" alt="Habitt Logo" id="logo">
+        <h1> Habitt App</h1>
+    </div>
+    
+    <div class="divider"></div>
     <section class="layout">
         <div class="sidebar">
-            <div class="button">
-                <button type="button" onclick="location.href='/creator';">New +</button>
-            </div>
-            <div class="Habits"> Habits:
-                {% include "partials/cards_daily.html"%}
-            </div>
-            <div class="analytics">
-                <table> Mini Analytics</table>
-            </div>
-            
+            {% include "partials/sidebar.html"%}
         </div>
         <div class="body">
             <nav id="nav-bar">
                 <ul>
                     <li><a id="active" href="/">Analytics</a></li>
                     <li><a href="/habits">Habits</a></li>
-                    <li><a href="/create">Create Page</a></li>
+                    <li><a href="/creator">Create Page</a></li>
                 </ul>
             </nav>
-            <div class="analytics" id="week">
-                <div>{{ plot_weekly_prog | safe }}</div>
-            </div>
-            <div class="analytics" id="month">
-                
-            </div>
-            <div class="analytics" id="long">
-                <div>{{ plot_long | safe }}</div>
-            </div>
+            <div class="analytics">
+                <div id="week">
+                    <h2>Progress Tracker</h2>
+                    <div class="divider"></div>
+                    <div>{{ plot_weekly_prog | safe }}</div>
+                </div>
 
+                <div id="long">
+                    <h2>Longest Streaks across Habits</h2>
+                    <div class="divider"></div>
+                    <div>{{ plot_long | safe }}</div>
+                </div>
             </div>
         </div>
       </section>

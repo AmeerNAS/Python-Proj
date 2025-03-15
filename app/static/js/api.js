@@ -17,6 +17,7 @@ function renderHabits(habits) {
 
     habits.forEach(habit => {
         let row = `<tr>
+            <td>${habit.id}</td>
             <td>${habit.name}</td>
             <td>${habit.description || "No description"}</td>
             <td>${habit.interval}</td>

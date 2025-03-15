@@ -2,7 +2,7 @@ document.addEventListener("DOMContentLoaded", function () {
     console.log("✅ checkboxes.js loaded!");
 
     document.querySelectorAll(".h_check").forEach((checkbox) => {
-        console.log(`Found checkbox with ID: ${checkbox.value}`);  // Debugging line
+        console.log(`Found checkbox with ID: ${checkbox.value}`);  //debugging line
 
         checkbox.addEventListener("change", async function () {
             console.log(`Clicked: Habit ID ${this.value}, Checked: ${this.checked}`);

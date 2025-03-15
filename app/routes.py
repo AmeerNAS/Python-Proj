@@ -93,29 +93,6 @@ def get_habits():
 def habit_list():
     return render_template("habits.html")
 
-""" @app.route("/check/<int:habit_id>", methods=["POST"])
-def check(habit_id):
-    ""Toggle the check-off state of a habit.""
-    data = request.get_json()  # Ensure JSON data is received
-    is_checked = data.get("checked", False)
-
-    habit_data = db_manager.getHabitByID(habit_id)
-    
-    if not habit_data:
-        return jsonify({"error": "Habit not found"}), 404
-
-    habit = Habit.fromJSON(habit_data)
-
-    if is_checked:
-        habit.checkOff()
-        print(f"Habit {habit.id} checked off")
-    else:
-        habit.uncheckOff()
-        print(f"Habit {habit.id} unchecked")
-
-    db_manager.saveDB()
-    return jsonify({"success": True}) """
-
 @app.route("/check/<int:habit_id>", methods=["POST"])
 def check(habit_id):
     """Toggle the check-off state of a habit."""

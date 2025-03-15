@@ -31,6 +31,7 @@ function displayHabits(habits) {
     habits.forEach(habit => {
         const row = document.createElement("tr");
         row.innerHTML = `
+            <td>${habit.id}</td>
             <td>${habit.name}</td>
             <td>${habit.desc ? habit.desc : "No description"}</td>
             <td>${habit.interval}</td>
