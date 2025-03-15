@@ -1,10 +1,18 @@
 document.addEventListener("DOMContentLoaded", function () {
     console.log("✅ checkboxes.js loaded!");
 
-    document.querySelectorAll(".h_check").forEach((checkbox) => {
-        console.log(`Found checkbox with ID: ${checkbox.value}`);  //debugging line
+    let isProcessing = false; // Flag to prevent multiple requests
 
-        checkbox.addEventListener("change", async function () {
+    document.querySelectorAll(".h_check").forEach((checkbox) => {
+        console.log(`Found checkbox with ID: ${checkbox.value}`);
+
+        checkbox.addEventListener("click", async function (event) {
+            if (isProcessing) {
+                console.warn("🚧 Request already in progress. Ignoring...");
+                return;
+            }
+
+            isProcessing = true; // Lock new requests
             console.log(`Clicked: Habit ID ${this.value}, Checked: ${this.checked}`);
 
             try {
@@ -19,12 +27,13 @@ document.addEventListener("DOMContentLoaded", function () {
                 let result = await response.json();
                 console.log("✅ Update successful:", result);
 
-                // ✅ Refresh the page after successful update
                 if (result.success) {
-                    location.reload();
+                    setTimeout(() => location.reload(), 300); // Slight delay before reload
                 }
             } catch (error) {
                 console.error("❌ Error updating habit:", error);
+            } finally {
+                setTimeout(() => { isProcessing = false; }, 500); // Reset flag with delay
             }
         });
     });

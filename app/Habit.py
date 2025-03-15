@@ -1,87 +1,177 @@
-from datetime import datetime, timedelta
+from datetime import datetime, date
 from app.db import Database
+from dataclasses import dataclass
 
+
+@dataclass
 class Habit:
-    """ Habits class """   
-
-    def __init__(self, id: int, name: str, desc: str, interval: str, check_record=None, current_streak=0, longest_streak=0):
+    """Represents a habit tracked in the system."""
+    
+    habit_id: int
+    name: str
+    desc: str
+    interval: str
+    current_streak: int = 0
+    longest_streak: int = 0
+    
+    def __post_init__(self) -> None:
+        self.refreshStreaks()
+    
+    
+    def refreshStreaks(self):
+        self.current_streak, self.longest_streak = self.getStreaks() 
+    
         
-        # Basic data initialization
-        #could potentially be replaced with more efficient solution
-
-        self.id = id
-        self.name = name
-        self.desc = desc
-        self.interval = interval
-        self.current_streak = current_streak
-        self.longest_streak = longest_streak
-
-        # check-off dates record list
-        self.check_record = check_record if isinstance(check_record, list) else []
-
-    #Check-off function: takes current date and appends it to check_record list then computes streak.
-    def checkOff(self, date=None):
-        """ Marks the habit as completed for the given date."""
-        date = date if date else datetime.today().strftime('%Y-%m-%d')
-
-        # recurring execute check
-        if date in self.check_record:
-            print(f"Warning: Habit already checked off on {date}.")
-            return False  # Avoid duplicates
-
-        self.check_record.append(date)
+    #Prof. compute streak method improvised
+    def getStreaks(self, mode=None):
+        """ 
+        Calculates streaks without resetting the saved values. 
+        
+        :param "l" "c" | None mode: 
+            - None: Return both streaks (tuple: current, longest).
+            - "long": Return longest streak.
+            - "c": Return current streak. 
+        :return: Current streak or longest streak or both.
+        :rtype: int | (int, int)
+        """
         db = Database()
-        db.updateHabit(self.toJSON())
+        history = [s for s in db.db["tables"]["history"] if s["habit_id"] == self.habit_id]
+
+        if not history:
+            return (0, 0) if mode is None else 0
+        
+        streaks = [record["streak"] for record in history]
+        current_streak = streaks[-1] if streaks else 0
+        longest_streak = max(streaks) if streaks else 0
+
+        if mode is None:
+            return current_streak, longest_streak
+        elif mode == "c":
+            return current_streak
+        elif mode == "l":
+            return longest_streak
+        else:
+            raise ValueError("Invalid mode. Use 'c', 'l', or None.")
+        
+        
+    def getCheckins(self) -> list[str]:
+        """Retrieves all check-in dates sorted."""
+        db = Database()
+        dates = [record["date"] for record in db.db["tables"]["history"] if record["habit_id"] == self.habit_id]
+        dates.sort()
+        return dates
+    
+    @staticmethod
+    def convertor(date: str):
+        """Converts a string date 'YYYY-MM-DD' into a datetime.date object."""
+        return datetime.strptime(date, "%Y-%m-%d").date()
+
+    def getLastStreak(self) -> dict | None:
+        """Retrieves the last recorded streak for a habit."""
+        db = Database()
+        streaks = [s for s in db.db["tables"]["history"] if s["habit_id"] == self.habit_id]
+
+        #Empty case
+        if not streaks:
+            return None 
+        print("streak: " + str(streaks)) # !
+        return max(streaks, key=lambda s: self.convertor(s["date"]))
+    
+        
+    def isChecked(self, date: str = None) -> bool:
+        """Checks if a habit was completed on a specific date."""
+        date = date or datetime.today().strftime('%Y-%m-%d')
+        db = Database()
+        return any(record["habit_id"] == self.habit_id and record["date"] == date for record in db.db["tables"]["history"])
+    
+    
+    
+    def doesStreakContinue(self, last_date: str | date, current_date: datetime.date = None) -> bool:
+        """Checks if the streak continues based on the habit's interval."""
+        last_date = self.convertor(last_date) if isinstance(last_date, str) else last_date
+        current_date = current_date or datetime.today().date()
+
+        intervals = {"DAILY": 1, "WEEKLY": 7}
+        interval_days = intervals.get(self.interval.upper(), 1)  
+
+        return (current_date - last_date).days <= interval_days
+    
+    
+    def checkOff(self):
+        """Marks habit as checked for today's date and updates streak history."""
+        print("I am in checkOff!") # !
+        today = datetime.today().strftime("%Y-%m-%d")
+        db = Database()
+
+        if self.isChecked(today):
+            print(f"Warning: Habit already checked off on {today}.")
+            return False
+
+        last_streak = self.getLastStreak()
+        new_streak = 1
+
+        if last_streak:
+            if self.doesStreakContinue(last_streak["date"]):
+                new_streak = last_streak["streak"] + 1
+            else:
+                last_streak["status"] = "broken"
+                db.updateHistory(
+                    habit_id=self.habit_id, 
+                    date=last_streak["date"], 
+                    new_streak=last_streak["streak"], 
+                    new_status=last_streak["status"]
+                )
+
+        db.addHistory(
+            habit_id=self.habit_id,
+            streak=new_streak,
+            status="active",
+            date=today
+        )
+        db.saveDB()
+        print("history: " + today + " added") # !
+        
+        self.refreshStreaks()
         return True
     
-    def uncheckOff(self, date=None):
-        """checkOff reverser"""
-        date = date if date else datetime.today().strftime('%Y-%m-%d')
-         
-        if date in self.check_record:
-            self.check_record.remove(date)
-            return True
-        return False
-    
-    def isChecked(self):
-        """Checks if the habit is broken by detecting when the last check-in was."""
-        if not self.check_record:
-            return True  # No check-ins means the habit is broken
-        
-        last_check = datetime.strptime(self.check_record[-1], '%Y-%m-%d').date()
-        today = datetime.today().date()
+    def uncheckOff(self, date=None) -> bool:
+        """Removes a check-in for a given date (defaults to today)."""
+        if not date:
+            date = datetime.today().strftime('%Y-%m-%d')
 
-        # Determine allowed gap based on habit interval
-        interval_days = {"daily": 1, "weekly": 7, "monthly": 30}.get(self.interval, 1)
+        db = Database()
         
-        return (today - last_check) > timedelta(days=interval_days)
+        # Retrieve the last recorded streak
+        last_streak = self.getLastStreak()
+        
+        # If no history exists for this habit, return False
+        if not last_streak or last_streak["date"] != date:
+            print(f"Warning: No check-in found for {date}.")
+            return False
+        
+        # Remove the habit entry for the given date
+        db.deleteHistory(
+            habit_id=self.habit_id, 
+            date=date)
+        return True
+
 
     @staticmethod
-    def fromJSON(data: dict[str, any]):
-        """ Creates a Habit object from JSON data """
+    def fromJSON(data: dict):
+        """Creates a Habit object from JSON data."""
         return Habit(
-            id = int(data["id"]),
-            name = data["name"],
-            desc = data["desc"],
-            interval = data["interval"],
-            #check_record=database["check_record"]
-            check_record=data.get("check_record", [])
+            habit_id=int(data["id"]),
+            name=data["name"],
+            desc=data["desc"],
+            interval=data["interval"]
         )
+        
 
     def toJSON(self):
-        """ Translates the Habit object into JSON """
-        habit_to_dict = {
-            "id": self.id,
+        """Converts the Habit object to a dictionary."""
+        return {
+            "habit_id": self.habit_id,
             "name": self.name,
             "desc": self.desc,
-            "interval": self.interval,
-            "check_record": self.check_record
+            "interval": self.interval
         }
-        return habit_to_dict
-
-    def toString(self, withDesc=False):
-        """ Habit object to string converter """
-        if (withDesc):
-            return f"Habit ({self.id}, {self.name}, desc: {self.desc},\n {self.interval}," # streak= {self.getStreak()}, longest Streak= {self.longest_streak} )"
-        return f"Habit id={self.id}, name={self.name}, interval={self.interval}," # streak= {self.getStreak()}, longest Streak= {self.longest_streak} )"
-

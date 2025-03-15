@@ -4,12 +4,15 @@
   --acion: #4CAF50;
 }
 
-* {
-  font-family: Arial, Helvetica, sans-serif
+body {
+  font-family: Arial, Helvetica, sans-serif;
+  margin: 0;
+  padding: 0;
 }
 
 .header {
   display: flex;
+  margin: 20px 20px 0 20px;
 }
   #logo {
     width: 75px;
@@ -36,7 +39,7 @@
     gap: 10px;
 
     border-right: 2px #ddd solid;
-    padding-right: 13px;
+    padding: 0 15px;
   }
     .Habits { 
       grid-area: Habits;
