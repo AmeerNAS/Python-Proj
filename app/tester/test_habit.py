@@ -1,38 +1,55 @@
-from app.Habit import Habit
-from datetime import datetime
 import pytest
+from datetime import datetime, timedelta
+from app.habit import Habit
+from app.db import Database
 
-
-class TestHabit:
-
-    def setup_method(self):
-        #Habit setup for testing
-        self.habit = Habit("Excercise", "do excercises for 30 minutes", "University")
-
-    def test_single_date(self):
-        self.habit.checking(datetime(2025, 1, 3))
-        assert self.habit.longest_streak == 1
-
-    def test_multi_date(self):
-        self.habit.checking(datetime(2025,1,3))
-        self.habit.checking(datetime(2025,1,4))
-        self.habit.checking(datetime(2025,1,5))
-        assert self.habit.longest_streak == 3
-
-        self.habit.checking(datetime(2025,1,10))
-        assert self.habit.longest_streak == 3 
+@pytest.fixture
+def setup_habit():
+    """Fixture to create a sample habit for testing."""
+    db = Database()
     
-    def test_personal(self):
-        # Test
-        test = Habit(1, "update","test habit for updating","daily")
-        #test.editHabit("name", "updated")
-
-        habit = Habit(2, "test", "test habit", "monthly", ["2025-02-19", "2025-02-11", "2025-02-13", "2025-02-14", "2025-02-15", "2025-02-16", "2025-02-17", "2025-02-23"])
-        print(test.id) 
-        print(habit.toString()) 
-        print(habit.isbroken())   
+    # Clear existing data for isolated tests
+    db.db["tables"]["history"] = []
+    db.saveDB()
     
-    def teardown_method(self):
-        del self.habit
+    habit = Habit(habit_id=1, name="Test Habit", desc="Testing Habit", interval="DAILY")
+    return habit, db
 
-pytest.main
+def test_habit_initialization(setup_habit):
+    """Test if the habit initializes correctly."""
+    habit, _ = setup_habit
+    assert habit.habit_id == 1
+    assert habit.name == "Test Habit"
+    assert habit.interval == "DAILY"
+    assert habit.current_streak == 0
+    assert habit.longest_streak == 0
+
+def test_check_off_habit(setup_habit):
+    """Test checking off a habit updates the streak."""
+    habit, db = setup_habit
+    assert habit.checkOff() is True  # Should succeed
+    assert habit.current_streak == 1
+    assert habit.isChecked() is True
+
+def test_streak_continuation(setup_habit):
+    """Test if streak continues correctly based on interval."""
+    habit, db = setup_habit
+    today = datetime.today().strftime("%Y-%m-%d")
+    
+    habit.checkOff()  # Check off today
+    assert habit.current_streak == 1
+    
+    # Simulate next day check-in
+    next_day = (datetime.today() + timedelta(days=1)).strftime("%Y-%m-%d")
+    db.addHistory(habit.habit_id, 2, "active", next_day)
+    db.saveDB()
+    
+    habit.refreshStreaks()
+    assert habit.current_streak == 2
+
+def test_uncheck_habit(setup_habit):
+    """Test unchecking a habit removes it from history."""
+    habit, _ = setup_habit
+    habit.checkOff()
+    assert habit.uncheckOff() is True  # Should remove today's check-in
+    assert habit.isChecked() is False
