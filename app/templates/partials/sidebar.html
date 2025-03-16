@@ -7,40 +7,52 @@
     <p>There are {{ habits_daily|length }} daily habits.</p>
     <div id="daily_habits"><span>Daily:</span>
         <ul class="card">
-
-            {% for h in habits_daily %}            
-                <li>
-                    <input type="checkbox" class="h_check" id="habit_{{ h.habit_id }}" 
-                        value="{{ h.habit_id }}" 
-                        {% if h.isChecked() == True %}checked{% endif %}>
-                    <label for="habit_{{ h.habit_id }}">
-                        <a href="/habit/{{ h.habit_id }}"> {{ h.name }} </a>
-                    </label>
-                    <br>
-                </li>
-            {% endfor %}
+            {% if habits_daily %}
+                {% for h in habits_daily %}            
+                    <li>
+                        <input type="checkbox" class="h_check" id="habit_{{ h.habit_id }}" 
+                            value="{{ h.habit_id }}" 
+                            {% if h.isChecked() == True %}checked{% endif %}>
+                        <label for="habit_{{ h.habit_id }}">
+                            <a href="/habit/{{ h.habit_id }}"> {{ h.name }} </a>
+                        </label>
+                        <br>
+                    </li>
+                {% endfor %}
+            {% else %}
+                <p>No Daily habits yet! How about creating some?</p>
+            {% endif %}
 
         </ul>
     </div>
     <div class="divider"></div>
     <div id="weekly_habits"> <span>Weekly:</span>
         <ul class="card">
-            
-            {% for h in habits_weekly %}
-                <li>
-                    <input type="checkbox" class="h_check" id="habit_{{ h.habit_id }}" 
-                        value="{{ h.habit_id }}" 
-                        {% if h.isChecked() %}checked{% endif %}>
-                    <label for="habit_{{ h.habit_id }}">
-                        <a href="/habit/{{ h.habit_id }}"> {{ h.name }} </a>
-                    </label>
-                    <br>
-                </li>
-            {% endfor %}
-            
+            {% if habits_weekly %}
+                {% for h in habits_weekly %}
+                    <li>
+                        <input type="checkbox" class="h_check" id="habit_{{ h.habit_id }}" 
+                            value="{{ h.habit_id }}" 
+                            {% if h.isChecked() %}checked{% endif %}>
+                        <label for="habit_{{ h.habit_id }}">
+                            <a href="/habit/{{ h.habit_id }}"> {{ h.name }} </a>
+                        </label>
+                        <br>
+                    </li>
+                {% endfor %}
+            {% else %}
+                <p>No weekly habits yet!</p>
+            {% endif %}
         </ul>
     </div>
 </div>
-<div class="analytics">
-    <table> Mini Analytics</table>
+<div class="mini">
+    <h2> Mini Analytics:</h2>
+        <ul>
+            {% for a in analytics%}
+                <li>
+                    {{a}}
+                </li>
+            {% endfor %}
+        </ul>
 </div>

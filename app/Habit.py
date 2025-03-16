@@ -18,10 +18,9 @@ class Habit:
         self.refreshStreaks()
     
     
-    def refreshStreaks(self):
-        self.current_streak, self.longest_streak = self.getStreaks() 
+    # +++++++++
+    # Utilities
     
-        
     #Prof. compute streak method improvised
     def getStreaks(self, mode=None):
         """ 
@@ -53,38 +52,9 @@ class Habit:
         else:
             raise ValueError("Invalid mode. Use 'c', 'l', or None.")
         
+    def refreshStreaks(self):
+        self.current_streak, self.longest_streak = self.getStreaks() 
         
-    def getCheckins(self) -> list[str]:
-        """Retrieves all check-in dates sorted."""
-        db = Database()
-        dates = [record["date"] for record in db.db["tables"]["history"] if record["habit_id"] == self.habit_id]
-        dates.sort()
-        return dates
-    
-    @staticmethod
-    def convertor(date: str):
-        """Converts a string date 'YYYY-MM-DD' into a datetime.date object."""
-        return datetime.strptime(date, "%Y-%m-%d").date()
-
-    def getLastStreak(self) -> dict | None:
-        """Retrieves the last recorded streak for a habit."""
-        db = Database()
-        streaks = [s for s in db.db["tables"]["history"] if s["habit_id"] == self.habit_id]
-
-        #Empty case
-        if not streaks:
-            return None 
-        print("streak: " + str(streaks)) # !
-        return max(streaks, key=lambda s: self.convertor(s["date"]))
-    
-        
-    def isChecked(self, date: str = None) -> bool:
-        """Checks if a habit was completed on a specific date."""
-        date = date or datetime.today().strftime('%Y-%m-%d')
-        db = Database()
-        return any(record["habit_id"] == self.habit_id and record["date"] == date for record in db.db["tables"]["history"])
-    
-    
     
     def doesStreakContinue(self, last_date: str | date, current_date: datetime.date = None) -> bool:
         """Checks if the streak continues based on the habit's interval."""
@@ -95,14 +65,59 @@ class Habit:
         interval_days = intervals.get(self.interval.upper(), 1)  
 
         return (current_date - last_date).days <= interval_days
+        
+    
+    @staticmethod
+    def convertor(date: str):
+        """Converts a string date 'YYYY-MM-DD' into a datetime.date object."""
+        return datetime.strptime(date, "%Y-%m-%d").date()
+
+    def getLastStreak(self) -> dict | None:
+        """Retrieves the last recorded streak for the habit."""
+        db = Database()
+        streaks = [s for s in db.db["tables"]["history"] if s["habit_id"] == self.habit_id]
+
+        #Empty case
+        if not streaks:
+            return None 
+        return max(streaks, key=lambda s: self.convertor(s["date"]))
+    
+    def getAllStreaks(self) -> dict | None:
+        """Retrieves all recorded streaks for the habit."""
+        db = Database()
+        streaks = [s for s in db.db["tables"]["history"] if s["habit_id"] == self.habit_id]
+
+        print(streaks)
+        #Empty case
+        if not streaks:
+            return None 
+        return streaks
+        
+    
+    
+    # +++++++++++
+    # Check funcs
+        
+    def isChecked(self, date: str = None) -> bool:
+        """Checks if a habit was completed on a specific date."""
+        date = date or datetime.today().strftime('%Y-%m-%d')
+        db = Database()
+        return any(record["habit_id"] == self.habit_id and record["date"] == date for record in db.db["tables"]["history"])
+    
+    
+    def getCheckins(self) -> list[str]:
+        """Retrieves all check-in dates sorted."""
+        db = Database()
+        dates = [record["date"] for record in db.db["tables"]["history"] if record["habit_id"] == self.habit_id]
+        dates.sort()
+        return dates
     
     
     def checkOff(self):
         """Marks habit as checked for today's date and updates streak history."""
-        print("I am in checkOff!") # !
-        today = datetime.today().strftime("%Y-%m-%d")
         db = Database()
-
+        today = datetime.today().strftime("%Y-%m-%d")
+        
         if self.isChecked(today):
             print(f"Warning: Habit already checked off on {today}.")
             return False
@@ -155,6 +170,9 @@ class Habit:
             date=date)
         return True
 
+
+    # ++++++++++
+    # JSON Funcs
 
     @staticmethod
     def fromJSON(data: dict):

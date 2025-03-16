@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">   
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    {% block head %}
+
+    {% endblock %}    
+    <title>{%block title%}{%endblock%}</title>
+</head>
+
+<body>
+    <body>
+        <a href="{{ url_for('index')}}" style="text-decoration: none;color: black;">
+            <div class="header">
+                <img src="{{ url_for('static', filename='img/Ht icon.png')}} " alt="Habitt Logo" id="logo">
+                <h1> Habitt App</h1>
+            </div>
+        </a>
+        
+        <div class="divider"></div>
+        <nav id="nav-bar">
+            <ul>
+                <li><a href="/">Analytics</a></li>
+                <li><a {%if title == "habits" %}id="active"{% endif%} href="/habits">Habits</a></li>
+                <li><a {%if title == "creator" %}id="active"{% endif%} href="/creator">Create Page</a></li>
+            </ul>
+        </nav>
+        <main>
+          {% block content %}
+
+          {% endblock %}
+        </main>
+      </body>
+    
+</body>
+</html>

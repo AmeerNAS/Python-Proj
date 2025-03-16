@@ -28,12 +28,12 @@ document.addEventListener("DOMContentLoaded", function () {
                 console.log("✅ Update successful:", result);
 
                 if (result.success) {
-                    setTimeout(() => location.reload(), 300); // Slight delay before reload
+                    setTimeout(() => location.reload(), 10); // with delay
                 }
             } catch (error) {
                 console.error("❌ Error updating habit:", error);
             } finally {
-                setTimeout(() => { isProcessing = false; }, 500); // Reset flag with delay
+                setTimeout(() => { isProcessing = false; }, 500); // reset flag
             }
         });
     });

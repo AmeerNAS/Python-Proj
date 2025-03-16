@@ -1,21 +1,34 @@
 document.addEventListener("DOMContentLoaded", function() {
-    fetchHabits(); // Load habits when the page loads
+    fetchHabits();
 });
 
 function fetchHabits() {
     const searchQuery = document.getElementById("search").value.trim();
     const intervalFilter = document.getElementById("interval").value;
-    console.log(intervalFilter)
-    if (intervalFilter === "all") {
-        var url = `/api/habits?search=${encodeURIComponent(searchQuery)}`;
+    const minStreak = document.getElementById("streak").value;
+    const sortBy = document.getElementById("sort").value;
+    const reverseSort = document.getElementById("reverseSort").checked; // Get checkbox value
+
+    let url = `/api/habits?search=${encodeURIComponent(searchQuery)}`;
+
+    if (intervalFilter !== "all") {
+        url += `&interval=${encodeURIComponent(intervalFilter)}`;
     }
-    else {
-        var url = `/api/habits?search=${encodeURIComponent(searchQuery)}&interval=${encodeURIComponent(intervalFilter)}`;
+
+    if (minStreak) {
+        url += `&streak=${encodeURIComponent(minStreak)}`;
     }
     
+    if (sortBy !== "none") {
+        url += `&sort=${encodeURIComponent(sortBy)}`;
+    }
+    if (reverseSort !== false) {
+        url += `&reverse=${encodeURIComponent(reverseSort)}`;
+    }
+
     fetch(url)
         .then(response => response.json())
-        .then(habits => displayHabits(habits))
+        .then(habits => displayHabits(habits)) 
         .catch(error => console.error("Error fetching habits:", error));
 }
 
@@ -24,7 +37,7 @@ function displayHabits(habits) {
     tableBody.innerHTML = ""; // Clear previous results
 
     if (habits.length === 0) {
-        tableBody.innerHTML = "<tr><td colspan='4' style='text-align:center;'>No habits found</td></tr>";
+        tableBody.innerHTML = "<tr><td colspan='5' style='text-align:center;'>No habits found</td></tr>";
         return;
     }
 

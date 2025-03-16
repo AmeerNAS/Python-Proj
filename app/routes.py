@@ -71,37 +71,59 @@ def habit(habit_id):
 
     habit = Habit.fromJSON(habit_data)
     current_streak, longest_streak = habit.getStreaks()
+    
+    #plots
+    plot_history_html = plotHistory(habit)
+    plot_stats_html = plotStats(habit)
 
     return render_template(
         "habit.html",
         habit=habit,
         longest_streak=longest_streak,
-        current_streak=current_streak
+        current_streak=current_streak,
+        streaks= habit.getAllStreaks(),
+        plot_history=plot_history_html,
+        plot_stats=plot_stats_html
     )
 
 @app.route("/api/habits")
 def get_habits():
     """Fetch habits with optional filters (interval & min_streak)."""
     db_manager = Database()
-    habit_dicts = db_manager.db["tables"]["habit"]  # Get raw habit data (as dicts)
+    habit_dicts = db_manager.db["tables"]["habit"]  #aw habit
 
     habits = [Habit.fromJSON(h) for h in habit_dicts]  
 
-    # Get filter params
+    #get filter params
     name = request.args.get("search", None)
     interval = request.args.get("interval", None)
     min_streak = request.args.get("streak", type=int, default=0)
+    
+    #get sorter params
+    sort_by = request.args.get("sort", "none")
+    reverse = request.args.get("reverse", False)
 
     #apply filtering
-    filtered_habits = filterHabits(habits=habits, name=name, interval=interval, min_streak=min_streak)
-
+    filtered_habits = filterHabits(habits=habits, name=name, interval=interval, min_streak=int(min_streak))
+    
+    #apply sorting
+    if sort_by != "none":
+        habits = sortHabits(habits, sort_by)
+    
+    if (min_streak != "none") and (reverse != False):
+        accepted_sorts = ["name", "interval", "l", "c"]
+        if min_streak in accepted_sorts:
+            filtered_habits = sortHabits(habits=filtered_habits, by=min_streak, reverse=reverse)
+        else:
+            filtered_habits = sortHabits(habits=filtered_habits, by=None, reverse=reverse)
+    
     formatted_habits = [
         {
             "id": habit.habit_id,
             "name": habit.name,
             "desc": habit.desc,
             "interval": habit.interval,
-            "streak": habit.getStreaks("l") #inshallah it works 
+            "streak": habit.longest_streak #inshallah it works 
         }
         for habit in filtered_habits
     ]
@@ -119,25 +141,53 @@ def check(habit_id):
     data = request.get_json()  # Ensure JSON data is received
     is_checked = data.get("checked", False)
 
-    print(f"🔄 Received POST for habit {habit_id} with checked: {is_checked}")  # Debugging  
+    print(f"🔄 Received POST for habit {habit_id} with checked: {is_checked}")  # !
 
     habit_data = db_manager.getHabitByID(habit_id)  
     if not habit_data:
         print(f"❌ Habit {habit_id} not found!")
         return jsonify({"error": "Habit not found"}), 404
 
-    habit = Habit.fromJSON(habit_data)  # Convert JSON to Habit object
+    habit = Habit.fromJSON(habit_data)
 
     if is_checked:
-        habit.checkOff()  #This should add today's date to history
-        print(f"✅ Habit {habit.habit_id} checked off - New check_record: {habit.getLastStreak()}")
+        habit.checkOff()  #adds todays date
+        print(f" Habit {habit.habit_id} checked off - New check_record: {habit.getLastStreak()}") # !
     else:
-        habit.uncheckOff()  #This should remove today's date
-        print(f"✅ Habit {habit.habit_id} unchecked - Updated check_record: {habit.getLastStreak()}")
+        habit.uncheckOff()  #removes today date
+        print(f" Habit {habit.habit_id} unchecked - Updated check_record: {habit.getLastStreak()}") # !
 
-    # ✅ Save the updated habit to the database
-
-    #db_manager.updateHabit(habit_id=habit.habit_id, name=habit.name, desc= habit.desc, interval=habit.interval)  
-    #db_manager.saveDB()
-    print(db_manager.getNextID())
     return jsonify({"success": True, "check_record": habit.getLastStreak()})
+
+@app.route("/edit/<int:habit_id>", methods=["GET", "POST"])
+def edit_habit(habit_id):
+    db_manager = Database()
+    habit = db_manager.getHabitByID(habit_id)
+    habit_obj = Habit.fromJSON(habit)
+    if not habit:
+        return "Habit not found", 404
+
+    if request.method == "POST":
+        name = request.form.get("name")
+        desc = request.form.get("desc")
+        interval = request.form.get("interval")
+
+        habit["name"] = name
+        habit["desc"] = desc
+        habit["interval"] = interval
+
+        if db_manager.updateHabit(habit_id=habit_id, name=habit["name"], desc=habit["desc"], interval=habit["interval"]) is None:
+            print("failed update")
+            return render_template("edit.html", habit=habit_obj)
+        
+        return redirect(url_for("habit", habit_id=habit_id))
+
+    return render_template("edit.html", habit=habit_obj)
+
+@app.route("/delete/<int:habit_id>", methods=["DELETE"])
+def delete_habit(habit_id):
+    db_manager = Database()
+    if db_manager.getHabitByID(habit_id=habit_id):
+        db_manager.deleteHabit(habit_id)
+        return jsonify({"message": f"Habit {habit_id} deleted successfully"}), 200
+    return jsonify({"error": "Habit not found"}), 404

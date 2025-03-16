@@ -40,6 +40,7 @@ body {
 
     border-right: 2px #ddd solid;
     padding: 0 15px;
+    align-content: start;
   }
     .Habits { 
       grid-area: Habits;

@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create a New Habit</title>
+    <link href="{{ url_for('static', filename='styles/creator.css')}}", rel="stylesheet" />
+</head>
+<body>
+    <a href="{{ url_for('index')}}" style="text-decoration: none;color: black;">
+        <div class="header">
+            <img src="static\img\Ht icon.png" alt="Habitt Logo" id="logo">
+            <h1> Habitt App</h1>
+        </div>
+    </a>
+    <div class="divider"></div>
+    <nav id="nav-bar">
+        <ul>
+            <li><a href="/">Analytics</a></li>
+            <li><a href="/habits">Habits</a></li>
+            <li><a id="active" href="/creator">Create Page</a></li>
+        </ul>
+    </nav>
+    <div class="divider"></div>
+    <div class="container">
+        <h1>Create a New Habit</h1>
+        <form action="/creator" method="POST">
+            <label for="name">Habit Name:</label>
+            <input type="text" id="name" name="name" required>
+
+            <label for="desc">description:</label>
+            <textarea id="desc" name="desc" rows="3"></textarea>
+
+            <label for="interval">Interval:</label>
+            <select id="interval" name="interval" required>
+                <option value="Daily">Daily</option>
+                <option value="Weekly">Weekly</option>
+            </select>
+
+            <button type="submit" class="btn">Create Habit</button>
+        </form>
+        <a href="/" class="back-btn">Back to Home</a>
+    </div>
+</body>
+</html>

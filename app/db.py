@@ -90,7 +90,7 @@ class Database:
         return [habit for habit in self.db["tables"]["habit"] if habit["name"] == name]
 
 
-    def getHabitByID(self, habit_id):
+    def getHabitByID(self, habit_id) -> dict[str, any]:
         """Returns a habit by its ID."""
         for habit in self.db["tables"]["habit"]:
             if int(habit["id"]) == habit_id:
