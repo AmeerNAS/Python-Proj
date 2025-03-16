@@ -4,7 +4,6 @@
         <button type="button" onclick="location.href='/creator';">New +</button>
     </div>
 
-    <p>There are {{ habits_daily|length }} daily habits.</p>
     <div id="daily_habits"><span>Daily:</span>
         <ul class="card">
             {% if habits_daily %}
@@ -20,7 +19,7 @@
                     </li>
                 {% endfor %}
             {% else %}
-                <p>No Daily habits yet! How about creating some?</p>
+                {% include 'partials/seed_btn.html'%}
             {% endif %}
 
         </ul>
@@ -45,14 +44,4 @@
             {% endif %}
         </ul>
     </div>
-</div>
-<div class="mini">
-    <h2> Mini Analytics:</h2>
-        <ul>
-            {% for a in analytics%}
-                <li>
-                    {{a}}
-                </li>
-            {% endfor %}
-        </ul>
 </div>

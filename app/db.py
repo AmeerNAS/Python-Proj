@@ -5,7 +5,10 @@ Database Model in JSON
 # Imports 
 import json
 import os
-from datetime import datetime
+from datetime import datetime, timedelta
+
+#used in getSeedData()    
+import random
 
 
 #TODO: updateHabit has O(n) try to find better algo.
@@ -36,7 +39,7 @@ class Database:
             "database": self.filename,
             "tables": {
                 "habit": [],
-                "history": []  # Replaces `history`
+                "history": []
             }
         }
         self.db = self.loadDB()
@@ -211,7 +214,7 @@ class Database:
 
         if len(self.db["tables"]["history"]) < initial_length:
             self.saveDB()
-            return True  # Successfully deleted
+            return True 
 
         return False
     
@@ -263,15 +266,57 @@ class Database:
                 record["streak"] = new_streak
                 record["status"] = new_status
                 self.saveDB()
-                return True  # Successfully updated
+                return True
 
         print(f"Warning: No matching history record found for habit ID {habit_id} on {date}.")
         return False
-    
 
-    
-    
-    
-    #External
+
+    #External (found online) 
     def get_seed_data(self):
-        pass
+        """
+        Populates the database with 10 sample habits and 4+ weeks of history for testing.
+        
+        :return: Populates Database main file however does not retune any real data.
+        """
+        sample_habits = [
+            ("Morning Run", "Go for a 30-minute run every morning", "DAILY"),
+            ("Reading", "Read at least 10 pages of a book", "DAILY"),
+            ("Meditation", "Meditate for 10 minutes", "DAILY"),
+            ("Workout", "Complete a full-body workout", "DAILY"),
+            ("Drink Water", "Drink 2L of water", "DAILY"),
+            ("Journal", "Write a journal entry", "DAILY"),
+            ("Guitar Practice", "Practice guitar for 30 minutes", "DAILY"),
+            ("Meal Prep", "Prepare healthy meals", "WEEKLY"),
+            ("Budgeting", "Track expenses for the week", "WEEKLY"),
+            ("Home Cleaning", "Clean the house thoroughly", "WEEKLY")
+        ]
+
+        # Add habits
+        for name, desc, interval in sample_habits:
+            habit_id = self.addHabit(name, desc, interval)
+
+            # Generate History
+            start_date = datetime.today() - timedelta(weeks=4)
+            streak = 0
+            for i in range(20 + random.randint(0, 7)):
+                date_str = (start_date + timedelta(days=i)).strftime("%Y-%m-%d")
+
+                # Introduce random habit breaks
+                if random.random() > 0.85: 
+                    continue
+
+                if random.random() > 0.9: 
+                    status = "broken"
+                    streak = 0 
+                else:
+                    status = "active"
+                    streak += random.choice([1, 1, 1, 2])
+
+                self.addHistory(habit_id, streak, status, date_str)
+
+        self.saveDB()
+        print("Seed data added successfully.")
+
+        # for Flask
+        return {"status": "success", "redirect": "/main"}

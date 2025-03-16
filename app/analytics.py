@@ -169,6 +169,9 @@ def plotLongestStreaks(habits: list[Habit]):
     habit_n_streaks = [(h.name, h.getStreaks("l")) for h in habits]
     habit_n_streaks.sort(key=lambda x: x[1], reverse=True)
     
+    if not habit_n_streaks:
+        return "<p>No Streaks available</p>"
+    
     habit_names, streaks = zip(*habit_n_streaks) if habit_n_streaks else ([], [])
 
     #uses color palette

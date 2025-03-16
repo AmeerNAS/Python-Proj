@@ -7,6 +7,8 @@ from app.analytics import *
 from app import app
 from app import Database
 
+# comments with ! at the beginning represent debug printouts lines that are used in tracking app processes and logic 
+
 @app.route('/')
 @app.route('/index')
 def index(): 
@@ -103,22 +105,27 @@ def get_habits():
     min_streak = request.args.get("streak", type=int, default=0)
     
     #get sorter params
-    sort_by = request.args.get("sort", "none")
+    sort_by = request.args.get("sort", type=str, default="none")
     reverse = request.args.get("reverse", False)
 
     #apply filtering
     filtered_habits = filterHabits(habits=habits, name=name, interval=interval, min_streak=int(min_streak))
-    
+
+    print(sort_by + str(type(sort_by)))
+    #apply reversing
+    if (sort_by == "none") and reverse :
+        filtered_habits = sortHabits(habits=filtered_habits, by=None, reverse=reverse)
+
+        
     #apply sorting
-    if sort_by != "none":
-        habits = sortHabits(habits, sort_by)
-    
-    if (min_streak != "none") and (reverse != False):
+    if (sort_by != "none"):
         accepted_sorts = ["name", "interval", "l", "c"]
-        if min_streak in accepted_sorts:
-            filtered_habits = sortHabits(habits=filtered_habits, by=min_streak, reverse=reverse)
+        if sort_by in accepted_sorts:
+            print("i sorted with accepted sort")
+            filtered_habits = sortHabits(habits=filtered_habits, by=sort_by, reverse=reverse)
         else:
             filtered_habits = sortHabits(habits=filtered_habits, by=None, reverse=reverse)
+        
     
     formatted_habits = [
         {
@@ -162,6 +169,7 @@ def check(habit_id):
 
     return jsonify({"success": True, "check_record": habit.getLastStreak()})
 
+
 @app.route("/edit/<int:habit_id>", methods=["GET", "POST"])
 def edit_habit(habit_id):
     db_manager = Database()
@@ -187,6 +195,7 @@ def edit_habit(habit_id):
 
     return render_template("edit.html", habit=habit_obj)
 
+
 @app.route("/delete/<int:habit_id>", methods=["DELETE"])
 def delete_habit(habit_id):
     db_manager = Database()
@@ -194,3 +203,11 @@ def delete_habit(habit_id):
         db_manager.deleteHabit(habit_id)
         return jsonify({"message": f"Habit {habit_id} deleted successfully"}), 200
     return jsonify({"error": "Habit not found"}), 404
+
+
+@app.route('/seed-data', methods=['POST'])
+def seed_data():
+    """Endpoint to trigger the seeding of habit data."""
+    db = Database()
+    result = db.get_seed_data()
+    return redirect('/')  # Redirect after done

@@ -174,3 +174,18 @@ body {
     .analytics {
       padding: 0 25px;
     }
+
+    #seedDataBtn {
+      display: block;
+        
+        width: 100%;
+        background-color: var(--acion);
+        color: white;
+        padding: 12px;
+        text-align: center;
+        font-size: 11px;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: background 0.3s;
+        border: none;
+    }

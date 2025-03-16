@@ -1,0 +1,13 @@
+<button id="seedDataBtn">No Data? Generate Seed Data</button>
+
+    <script>
+        document.getElementById("seedDataBtn").addEventListener("click", function() {
+            fetch('/seed-data', { method: 'POST' })
+                .then(response => {
+                    if (response.redirected) {
+                        window.location.href = response.url; // Redirect user
+                    }
+                })
+                .catch(error => console.error('Error:', error));
+        });
+    </script>
