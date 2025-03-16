@@ -1,8 +1,19 @@
+""" 
+Advanced Analytics module.
+Allows for analysis of data and plotting for visualization.
+External to habit or db modules, however requires Habit for functionlity.
+"""
+# Import
+#data parcing
 from datetime import timedelta, datetime
 from app.habit import Habit
+
+#data porcessing 
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
+
+#data reprsentations
 import plotly.graph_objects as go
 import plotly.io as pio
 
@@ -10,19 +21,45 @@ import plotly.io as pio
 # +++++++++
 # Utilities
 
-def parseDates(check_record):
-    """Convert string dates to datetime objects."""
-    return [datetime.strptime(date, '%Y-%m-%d') for date in check_record]
+def parseDates(record):
+    """
+    Convert string dates to datetime objects.
+    \
+        :param "%Y-%m-%d" record:
+            - %Y: the year, format of '20XX',
+            - %m: the month, formtat of '1X'.
+            - $d: the date format of '1X'.
+            :return: The inputted record
+            :rtype: datetime.date
+    """
+    return [datetime.strptime(date, '%Y-%m-%d') for date in record]
 
 def getProgress(habits: list[Habit], date):
-    """Calculate the percentage of habits completed on a given date."""
+    """
+    Calculate the percentage of habits completed on a given date.
+    \
+        :param list[Habit] habits:
+            A list of Habit object habits to be used.
+        :param Date date:
+            the date to be used for calculation.
+            
+        :return: 0 | The Calculated Percentage out of 100
+        :rtype: int
+    """
     total_habits = len(habits)
     completed_habits = sum(1 for habit in habits if habit.isChecked(date))
     
     return (completed_habits / total_habits) * 100 if total_habits > 0 else 0
 
 def getFullProgress(habits):
-    """Generate progress history using Habit class data."""
+    """Generate progress history using Habit class data.
+    \
+    :param list[Habit] habits:
+        A list of Habit object habits to be used.
+        
+    :return: {} | The calculated progress for the entire list of habits
+    :rtype: list
+    """
     all_dates = set()
     
     for habit in habits:
@@ -47,7 +84,25 @@ def getFullProgress(habits):
 # Filters and Sorters
 
 def filterHabits(habits: list[Habit], name: str = None, interval=None, min_streak: int = None):
-    """Filter habits by name, interval, or minimum streak length."""
+    """
+    Filter habits by name, interval, or minimum streak length.
+    \
+    :param str habits:
+        A list of Habit object habits to be used by the filter.
+        
+    :param str name:
+        A name keyword that will be used to filter the habits.
+        
+    :param str interval:
+        The type of interval to filter by.
+        
+    :param int min_streak:
+        Refers to the a specified integer that will be used to filter any habit with  streak below its value.
+        
+        
+    :return: {} | The Filtered list of the entire list of habits
+    :rtype: list[Habit]
+    """
     filtered = habits.copy()
     if name:
         name_lower = name.lower()
@@ -63,7 +118,27 @@ def filterHabits(habits: list[Habit], name: str = None, interval=None, min_strea
 
 
 def sortHabits(habits: list[Habit], by="name", reverse=False):
-    """Sort habits by name, interval, or streak length."""
+    """
+    Sort habits by name, interval, or streak value.
+    \
+    :param str habits: A list of Habit object habits to be used by the sorter.
+    
+           
+    :param str by: "name" | specified what sorting method to use.
+            
+            - by "interval": sorts by inerval difference
+            - by "name": sorts by name of habits
+            - by "l": sorts by longest streak value
+            - by "c": sorts by current streak value
+        
+    
+    :param bool reverser:
+        False | Toggles reverse indexing of sorter result
+        
+ 
+    :return: {} | The Sorted list of the entire list of habits
+    :rtype: list[Habit]
+    """
     if by is None and reverse:
         return reversed(habits)
     
@@ -79,10 +154,18 @@ def sortHabits(habits: list[Habit], by="name", reverse=False):
 # ++++++++
 # Plotters
 
+#Used once for peristant bar coloring
 import plotly.colors as pc
 
 def plotLongestStreaks(habits: list[Habit]):
-    """Generate an HTML representation of the streaks plot using Plotly."""
+    """Plots a bar Graph of the streaks plot and returns a HTML representation using Plotly.
+    \
+    :param list[Habit] habits:
+        A list of Habit object habits to be used in the algo.
+        
+    :return: "" | A converted SVG element plot of the list of habits
+    :rtype: str
+    """
     habit_n_streaks = [(h.name, h.getStreaks("l")) for h in habits]
     habit_n_streaks.sort(key=lambda x: x[1], reverse=True)
     
@@ -114,7 +197,17 @@ def plotLongestStreaks(habits: list[Habit]):
     return pio.to_html(fig, full_html=False)
 
 def plotHistory(habit: Habit):
-    """Plots the complete history of a habit over time."""
+    """
+    Plots a scatter of the complete history of a habit over time and 
+    returns a HTML representation using Plotly.
+    
+    \
+    :param list[Habit] habits:
+        A list of Habit object habits to be used in the algo.
+        
+    :return: "" | A converted SVG element plot of the list of habits
+    :rtype: str
+    """
     history = habit.getAllStreaks()
     
     if not history:
@@ -151,7 +244,20 @@ def plotHistory(habit: Habit):
 
 
 def plotStats(habit: Habit):
-    """Plots the average check-off distribution for a single habit."""
+    """
+    Plots the average check-off distribution for a single habit and 
+    returns a HTML representation using Plotly.
+    
+    \
+    :param list[Habit] habits:
+        A list of Habit object habits to be used in the algo.
+        
+    :return: "" | A converted SVG element plot of the habit object's check dates:
+    
+        - over the week if interval is daily
+        - over the momth's weeks if the interval is weekly
+    :rtype: str
+    """
     
     check_dates =[s["date"] for s in habit.getAllStreaks()] 
     if not check_dates:
@@ -195,7 +301,16 @@ def plotStats(habit: Habit):
     return pio.to_html(fig, full_html=False)
 
 def plotProgress(habits: list[Habit]):
-    """Generate a Plotly area plot for full progress, with last 7 days as the default view."""
+    """Generate area plot for full progress, with last 7 days as the default view and 
+    returns a HTML representation using Plotly.
+    
+    \
+    :param list[Habit] habits:
+        A list of Habit object habits to be used in the algo.
+        
+    :return: "" | A converted SVG element plot of the habit objects list (with a default view of the last 7 days)
+    :rtype: str
+    """
     progress_history = getFullProgress(habits)
 
     if not progress_history:

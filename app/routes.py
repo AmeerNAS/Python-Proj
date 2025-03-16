@@ -1,3 +1,7 @@
+""" 
+Flask Application Manager & Router module
+A connecting module that acts as middleware and backend for the web appliction 
+"""
 from flask import Flask, render_template, jsonify, request, redirect, url_for
 from app.analytics import *
 from app import app
@@ -56,7 +60,6 @@ def create_habit():
         except ValueError as e:
             return jsonify({"error": str(e)}), 400
 
-    # Handle GET request: Show the form for creating a habit
     return render_template('creator.html')
 
 

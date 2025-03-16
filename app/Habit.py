@@ -1,11 +1,33 @@
+""" 
+Habit Object Oriented Module
+Defines Habit as object, requires direct access to db module
+"""
+
+# Imports
 from datetime import datetime, date
+
+#db access
 from app.db import Database
+
+#object creation
 from dataclasses import dataclass
 
 
 @dataclass
 class Habit:
-    """Represents a habit tracked in the system."""
+    """
+    Represents a habit tracked in the system.
+    
+    :param int habit_id: The key index of the Habit object
+    :param str name:    The name of the habit object (short and hints on habit's purpose)
+    :param str desc:    The desc of the habit object (for expanding on or help clarifying the habit's purpose)
+    :param str interval: The interval of periodicity of the habit object (only accepts 'WEEKLY', 'DAILY', validated by database)
+    :param int current_streak: The current streak local save to avoid extensive recalculation (aids in performance for plotting)
+    :param int longest_streak: The longest streak local save to avoid extensive recalculation
+    
+    :return: A new habit entry with access to defauly database queries
+    :rtype: Habit
+    """
     
     habit_id: int
     name: str
@@ -15,6 +37,11 @@ class Habit:
     longest_streak: int = 0
     
     def __post_init__(self) -> None:
+        """ 
+        Post Initialization method.
+        \
+        Checks database for any history entries and get the habit's current_streak, longest_streak. 
+        """
         self.refreshStreaks()
     
     
@@ -53,11 +80,21 @@ class Habit:
             raise ValueError("Invalid mode. Use 'c', 'l', or None.")
         
     def refreshStreaks(self):
+        """ intermediatory method for streak values recalculation and asignment"""
         self.current_streak, self.longest_streak = self.getStreaks() 
         
     
     def doesStreakContinue(self, last_date: str | date, current_date: datetime.date = None) -> bool:
-        """Checks if the streak continues based on the habit's interval."""
+        """Checks if the streak continues based on the habit's interval.
+        
+        :param str | date last_date: 
+            The date of the habit's latest check entry
+        :param date (optional) current_date:
+            None | The date to be checked against, is set to current date if left None
+            
+        :return: Check reslts for if the habit continues (True) or has been broken (False).
+        :rtype: bool
+        """
         last_date = self.convertor(last_date) if isinstance(last_date, str) else last_date
         current_date = current_date or datetime.today().date()
 
@@ -69,7 +106,14 @@ class Habit:
     
     @staticmethod
     def convertor(date: str):
-        """Converts a string date 'YYYY-MM-DD' into a datetime.date object."""
+        """Converts a string date 'YYYY-MM-DD' into a datetime.date object.
+        
+        :param str date: 
+            The date as string type which will be converted.
+        
+        :return: date as a datetime object.
+        :rtype: date
+        """
         return datetime.strptime(date, "%Y-%m-%d").date()
 
     def getLastStreak(self) -> dict | None:
@@ -95,18 +139,28 @@ class Habit:
         
     
     
-    # +++++++++++
-    # Check funcs
+    # ++++++++++++++++++++
+    # Check property funcs
         
     def isChecked(self, date: str = None) -> bool:
-        """Checks if a habit was completed on a specific date."""
+        """Checks if a habit was completed on a specific date.
+        
+        :param str (optional) date: 
+            The date to be checked for, current date if left None.
+            
+        :return: The Check for matching check record as date.
+        :rtype: bool
+        """
         date = date or datetime.today().strftime('%Y-%m-%d')
         db = Database()
         return any(record["habit_id"] == self.habit_id and record["date"] == date for record in db.db["tables"]["history"])
     
     
     def getCheckins(self) -> list[str]:
-        """Retrieves all check-in dates sorted."""
+        """Retrieves all check-in dates sorted.
+        
+        :return: The list of check in dates connected to habit in the format of '%Y-%m-%d'
+        :rtype: list[str]"""
         db = Database()
         dates = [record["date"] for record in db.db["tables"]["history"] if record["habit_id"] == self.habit_id]
         dates.sort()
@@ -114,7 +168,11 @@ class Habit:
     
     
     def checkOff(self):
-        """Marks habit as checked for today's date and updates streak history."""
+        """
+        Marks habit as checked for today's date and updates streak history.
+        
+        :return: True if succeeded | False if failed
+        :rtype: bool"""
         db = Database()
         today = datetime.today().strftime("%Y-%m-%d")
         
@@ -150,7 +208,11 @@ class Habit:
         return True
     
     def uncheckOff(self, date=None) -> bool:
-        """Removes a check-in for a given date (defaults to today)."""
+        """Removes a check-in for a given date (defaults to today).
+        
+        :return: True if succeeded | False if failed
+        :rtype: bool
+        """
         if not date:
             date = datetime.today().strftime('%Y-%m-%d')
 
@@ -172,11 +234,15 @@ class Habit:
 
 
     # ++++++++++
-    # JSON Funcs
+    # JSON funcs
 
     @staticmethod
     def fromJSON(data: dict):
-        """Creates a Habit object from JSON data."""
+        """Creates a Habit object from JSON data.
+        
+        :return: Habit class Object created with json data
+        :rtype: Habit
+        """
         return Habit(
             habit_id=int(data["id"]),
             name=data["name"],
@@ -186,7 +252,11 @@ class Habit:
         
 
     def toJSON(self):
-        """Converts the Habit object to a dictionary."""
+        """Converts the Habit object to a dictionary.
+        
+        :return: converted habit object
+        :rtype: dict[str, any]
+        """
         return {
             "habit_id": self.habit_id,
             "name": self.name,
