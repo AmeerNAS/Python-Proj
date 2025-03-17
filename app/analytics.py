@@ -261,11 +261,12 @@ def plotStats(habit: Habit):
         - over the momth's weeks if the interval is weekly
     :rtype: str
     """
-    
-    check_dates =[s["date"] for s in habit.getAllStreaks()] 
-    if not check_dates:
-        return "<p>No check-off data available.</p>"  #incase no data
+    record = habit.getAllStreaks()
+    if not record:
+        return "<p>No check-off data available.</p>" #incase no data
 
+    check_dates =[s["date"] for s in record] 
+      
     # Convert dates to pandas datetime format
     df = pd.DataFrame(check_dates, columns=["date"])
     df["date"] = pd.to_datetime(df["date"])
